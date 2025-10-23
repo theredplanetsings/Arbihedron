@@ -37,7 +37,7 @@ class ArbihedronBot:
     
     async def initialize(self):
         """Initialise all components."""
-        logger.info("🚀 Initialising Arbihedron...")
+        logger.info("Initialising Arbihedron...")
         
         try:
             await self.engine.initialize()
@@ -48,7 +48,7 @@ class ArbihedronBot:
             logger.info(f"Min Profit Threshold: {config.trading.min_profit_threshold}%")
             logger.info(f"Max Position Size: ${config.trading.max_position_size}")
             
-            logger.success("✓ Initialisation complete")
+            logger.success("Initialisation complete")
             
         except Exception as e:
             logger.error(f"Initialisation failed: {e}")

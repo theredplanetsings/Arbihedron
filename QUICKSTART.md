@@ -61,8 +61,8 @@ Watch the live dashboard showing opportunities in real-time.
 │ Path: BTC → ETH → USDT → BTC               │
 │ Profit: 0.6500% ($6.50)                    │
 │ Risk: 25.3                                  │
-│ Status: ✓                                   │
-└─────────────────────────────────────────────┘
+│ Status: OK                                   │
+└──────────────────────────────────────────────┘
 ```
 
 **What this means:**
@@ -90,7 +90,7 @@ MIN_PROFIT_THRESHOLD=1.0  # Only execute if > 1% profit
 MAX_POSITION_SIZE=500  # Trade with $500 max
 ```
 
-### Enable Live Trading (⚠️ USE WITH CAUTION)
+### Enable Live Trading (USE WITH CAUTION)
 1. Get API keys from your exchange
 2. Add to `.env`:
 ```bash
@@ -104,6 +104,11 @@ ENABLE_PAPER_TRADING=false
 Test your strategy on recent market data:
 ```bash
 python backtest.py
+```
+
+### Enable Live Trading (USE WITH CAUTION)
+
+**Only after extensive testing:**
 ```
 
 This simulates 100 trading cycles and shows:

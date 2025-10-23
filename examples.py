@@ -29,9 +29,9 @@ async def simple_scan_example():
     for i, opp in enumerate(snapshot.opportunities[:5], 1):
         path_str = " → ".join(opp.path.path)
         print(f"{i}. {path_str}")
-        print(f"   Profit: {opp.path.profit_percentage:.4f}% (${opp.expected_profit:.2f})")
-        print(f"   Risk Score: {opp.risk_score:.1f}")
-        print(f"   Executable: {'✓' if opp.executable else '✗'}")
+        print(f"   Expected profit: ${opp.expected_profit:.2f}")
+        print(f"   Risk score: {opp.risk_score:.1f}")
+        print(f"   Executable: {'Yes' if opp.executable else 'No'}")
         print()
     
     # Cleanup

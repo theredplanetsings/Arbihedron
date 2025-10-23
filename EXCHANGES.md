@@ -8,13 +8,13 @@ Arbihedron supports 100+ exchanges through CCXT. However, some exchanges have ge
 
 ### For Testing (No Geo-Restrictions)
 
-| Exchange | Testnet | API Required | Notes |
-|----------|---------|--------------|-------|
-| **Kraken** | ❌ No | ❌ No (public) | Best for testing, no restrictions |
-| **Coinbase** | ❌ No | ❌ No (public) | Good US support |
-| **Bitfinex** | ❌ No | ❌ No (public) | Good liquidity |
-| **KuCoin** | ✅ Yes | ❌ No (public) | Good for testing |
-| **OKX** | ✅ Yes | ❌ No (public) | Formerly OKEx |
+| Exchange | Testnet? | API Key Needed? | Notes |
+|----------|----------|-----------------|-------|
+| **Kraken** | No | No (public) | Best for testing, no restrictions |
+| **Coinbase** | No | No (public) | Good US support |
+| **Bitfinex** | No | No (public) | Good liquidity |
+| **KuCoin** | Yes | No (public) | Good for testing |
+| **OKX** | Yes | No (public) | Formerly OKEx |
 
 ### For Production
 

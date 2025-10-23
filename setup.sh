@@ -1,11 +1,11 @@
 #!/bin/bash
 # Setup script for Arbihedron
 
-echo "🔺 Setting up Arbihedron..."
+echo "Setting up Arbihedron..."
 
 # Check Python version
 python_version=$(python3 --version 2>&1 | awk '{print $2}')
-echo "✓ Python version: $python_version"
+echo "Python version: $python_version"
 
 # Create virtual environment
 echo "Creating virtual environment..."
@@ -31,9 +31,9 @@ mkdir -p logs
 if [ ! -f .env ]; then
     echo "Creating .env file from template..."
     cp .env.example .env
-    echo "⚠️  Please edit .env with your exchange API credentials"
+    echo "Please edit .env with your exchange API credentials"
 else
-    echo "✓ .env file already exists"
+    echo ".env file already exists"
 fi
 
 # Make scripts executable
@@ -43,7 +43,7 @@ chmod +x examples.py
 chmod +x backtest.py
 
 echo ""
-echo "✅ Setup complete!"
+echo "Setup complete!"
 echo ""
 echo "Next steps:"
 echo "1. Edit .env with your configuration"
@@ -53,4 +53,6 @@ echo ""
 echo "For testing: python examples.py"
 echo "For backtesting: python backtest.py"
 echo ""
-echo "⚠️  Remember to enable paper trading mode first!"
+echo "Important:"
+echo "Remember to enable paper trading mode first!"
+echo "Set ENABLE_PAPER_TRADING=true in .env"

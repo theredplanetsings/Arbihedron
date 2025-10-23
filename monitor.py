@@ -71,7 +71,7 @@ class ArbitrageMonitor:
             
             profit_color = "green" if opp.path.profit_percentage > 1.0 else "yellow"
             risk_color = "green" if opp.risk_score < 30 else "yellow" if opp.risk_score < 60 else "red"
-            status = "✓" if opp.executable else "✗"
+            status = "OK" if opp.executable else "NO"
             status_color = "green" if opp.executable else "red"
             
             table.add_row(
@@ -119,9 +119,10 @@ class ArbitrageMonitor:
             self.total_opportunities_found += len(snapshot.opportunities)
     
     def log_opportunity(self, opportunity: ArbitrageOpportunity):
-        """Log an opportunity to console."""
-        logger.info(
-            f"💰 Opportunity: {opportunity.path} | "
+        """Print opportunity to console."""
+        self.console.print(
+            f"Opportunity: {opportunity.path} | "
+            f"Profit: {opportunity.profit_percentage:.4f}% (${opportunity.expected_profit:.2f}) | "
             f"Risk: {opportunity.risk_score:.1f}"
         )
     
@@ -129,8 +130,8 @@ class ArbitrageMonitor:
         """Log a trade execution."""
         if execution.success:
             logger.success(
-                f"✓ Execution successful: ${execution.actual_profit:.2f} profit "
+                f"Execution successful: ${execution.actual_profit:.2f} profit "
                 f"(Slippage: {execution.slippage:.2f}%)"
             )
         else:
-            logger.error(f"✗ Execution failed: {execution.error_message}")
+            logger.error(f"Execution failed: {execution.error_message}")

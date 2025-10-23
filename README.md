@@ -2,6 +2,8 @@
 
 **High-frequency triangular arbitrage system for cryptocurrency and forex markets**
 
+> **PAPER TRADING BY DEFAULT** - This system starts in simulation mode. No real trades are executed until you explicitly enable live trading and provide API keys with trading permissions.
+
 Arbihedron automatically detects and exploits price discrepancies in currency pairs through circular trading paths (A→B→C→A), capturing low-risk profit opportunities within single exchanges.
 
 ## Features
@@ -74,12 +76,19 @@ MAX_POSITION_SIZE=1000      # $1000 per trade
 SLIPPAGE_TOLERANCE=0.1      # 0.1% slippage
 
 # Safety First!
-ENABLE_PAPER_TRADING=true   # Start with paper trading
+ENABLE_PAPER_TRADING=true   # KEEP THIS TRUE FOR TESTING
 ```
 
 ### Running the Bot
 
-**Paper Trading Mode (Recommended for testing):**
+**Paper Trading Mode (DEFAULT - Recommended for testing):**
+
+The bot runs in **simulation mode** by default. No real money is at risk:
+- Discovers real market opportunities
+- Simulates trade execution
+- Calculates potential profits
+- No actual orders are placed
+
 ```bash
 python main.py
 ```
@@ -93,6 +102,15 @@ python examples.py
 ```bash
 python backtest.py
 ```
+
+**CAUTION: Switching to LIVE Trading (Advanced Users Only):**
+
+Only enable live trading after thorough testing:
+1. Obtain API keys from your exchange with **trading permissions**
+2. Set `ENABLE_PAPER_TRADING=false` in `.env`
+3. Add your real `API_KEY` and `API_SECRET`
+4. Start with small position sizes
+5. Monitor closely for the first 24 hours
 
 ## Project Structure
 

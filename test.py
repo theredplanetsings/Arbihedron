@@ -172,7 +172,7 @@ async def run_all_tests():
     await test_arbitrage_engine()
     
     print("=" * 50)
-    print("✅ TEST SUITE COMPLETE")
+    print("TEST SUITE COMPLETE")
     print("=" * 50)
 
 
