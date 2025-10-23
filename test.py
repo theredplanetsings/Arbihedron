@@ -153,7 +153,7 @@ def test_utils():
 async def run_all_tests():
     """Run all tests."""
     print("=" * 50)
-    print("🔺 ARBIHEDRON TEST SUITE")
+    print("🔺 Arbihedron Test Suite")
     print("=" * 50)
     print()
     
@@ -164,7 +164,7 @@ async def run_all_tests():
     
     # tests that need to connect to exchanges
     print("=" * 50)
-    print("NETWORK TESTS (May require API credentials)")
+    print("Network Tests (May require API credentials)")
     print("=" * 50)
     print()
     
@@ -172,7 +172,7 @@ async def run_all_tests():
     await test_arbitrage_engine()
     
     print("=" * 50)
-    print("TEST SUITE COMPLETE")
+    print("Test Suite Completd")
     print("=" * 50)
 
 
