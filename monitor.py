@@ -122,7 +122,7 @@ class ArbitrageMonitor:
         """Print opportunity to console."""
         self.console.print(
             f"Opportunity: {opportunity.path} | "
-            f"Profit: {opportunity.profit_percentage:.4f}% (${opportunity.expected_profit:.2f}) | "
+            f"Profit: {opportunity.path.profit_percentage:.4f}% (${opportunity.expected_profit:.2f}) | "
             f"Risk: {opportunity.risk_score:.1f}"
         )
     
