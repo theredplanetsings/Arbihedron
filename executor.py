@@ -1,18 +1,21 @@
 """Trade execution engine for arbitrage opportunities."""
 import asyncio
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from loguru import logger
 from models import (
     ArbitrageOpportunity, TradeExecution, TradeDirection
 )
-from config import config
+from config import config, RiskConfig
+
+if TYPE_CHECKING:
+    from exchange_client import ExchangeClient
 
 
 class TradeExecutor:
     """Executes triangular arbitrage trades."""
     
-    def __init__(self, exchange_client: ExchangeClient, config: RiskConfig):
+    def __init__(self, exchange_client: 'ExchangeClient', config: RiskConfig):
         """Initialise trade executor."""
         self.exchange = exchange_client
         self.execution_history = []

@@ -19,13 +19,14 @@ class ArbihedronBot:
     
     def __init__(self):
         """Initialise the bot."""
-        self.config = load_config()
+        self.config = config
         
         # Initialise components
-        self.exchange = ExchangeClient()
-        self.engine = ArbitrageEngine(self.exchange)
-        self.executor = TradeExecutor(self.exchange)
+        self.exchange = ExchangeClient(config.exchange)
+        self.engine = ArbitrageEngine(self.exchange, config.trading)
+        self.executor = TradeExecutor(self.exchange, config.risk)
         self.monitor = ArbitrageMonitor()
+        self.console = Console()
         
         # Setup logging
         logger.add(
