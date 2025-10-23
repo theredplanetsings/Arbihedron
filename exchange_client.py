@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from loguru import logger
 from models import TradingPair, TradeDirection
-from config import config
+from config import config, ExchangeConfig
 
 
 class ExchangeClient:
@@ -14,14 +14,17 @@ class ExchangeClient:
     def __init__(self, config: ExchangeConfig):
         """Initialise exchange client."""
         self.config = config
+        self.exchange = None
+        self.markets = {}
+        self._initialize_exchange()
     
     def _initialize_exchange(self):
         """Initialise CCXT exchange instance."""
         try:
-            exchange_class = getattr(ccxt, config.exchange.name)
+            exchange_class = getattr(ccxt, self.config.name)
             self.exchange = exchange_class({
-                'apiKey': config.exchange.api_key,
-                'secret': config.exchange.api_secret,
+                'apiKey': self.config.api_key,
+                'secret': self.config.api_secret,
                 'enableRateLimit': True,
                 'options': {
                     'defaultType': 'spot',
@@ -29,10 +32,10 @@ class ExchangeClient:
             })
             
             # Only enable sandbox/testnet if exchange supports it
-            if config.exchange.testnet:
+            if self.config.testnet:
                 try:
                     self.exchange.set_sandbox_mode(True)
-                    logger.info("Exchange client initialized in TESTNET mode")
+                    logger.info("Exchange client initialised in TESTNET mode")
                 except Exception as e:
                     logger.info(f"Exchange client initialised in LIVE mode (testnet not supported)")
             else:
@@ -46,7 +49,7 @@ class ExchangeClient:
         """Load available markets from exchange."""
         try:
             self.markets = await asyncio.to_thread(self.exchange.load_markets)
-            logger.info(f"Loaded {len(self.markets)} markets from {config.exchange.name}")
+            logger.info(f"Loaded {len(self.markets)} markets from {self.config.name}")
             return self.markets
         except Exception as e:
             logger.error(f"Failed to load markets: {e}")
