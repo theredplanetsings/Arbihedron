@@ -74,8 +74,12 @@ async def continuous_monitoring_example():
 
 
 if __name__ == "__main__":
-    # run a quick scan
-    asyncio.run(simple_scan_example())
-    
-    # uncomment this to keep scanning continuously
-    # asyncio.run(continuous_monitoring_example())
+    try:
+        # run a quick scan
+        asyncio.run(simple_scan_example())
+        
+        # uncomment this to keep scanning continuously
+        # asyncio.run(continuous_monitoring_example())
+    except KeyboardInterrupt:
+        print("\n\nStopping...")
+        print("Done!")
