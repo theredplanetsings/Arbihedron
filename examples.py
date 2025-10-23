@@ -8,11 +8,11 @@ from config import config
 
 async def simple_scan_example():
     """Simple example: scan for opportunities."""
-    print("🔺 Arbihedron - Simple Scan Example\n")
+    print("🔺 Arbihedron - Scan Example\n")
     
     # set everything up
-    exchange = ExchangeClient()
-    engine = ArbitrageEngine(exchange)
+    exchange = ExchangeClient(config.exchange)
+    engine = ArbitrageEngine(exchange, config.trading)
     
     print("Initialising engine...")
     await engine.initialize()
@@ -44,8 +44,8 @@ async def continuous_monitoring_example():
     print("🔺 Arbihedron - Continuous Monitoring Example\n")
     print("Press Ctrl+C to stop...\n")
     
-    exchange = ExchangeClient()
-    engine = ArbitrageEngine(exchange)
+    exchange = ExchangeClient(config.exchange)
+    engine = ArbitrageEngine(exchange, config.trading)
     
     await engine.initialize()
     
