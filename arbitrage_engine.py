@@ -1,6 +1,6 @@
 """Core triangular arbitrage detection engine."""
 import asyncio
-from typing import List, Set, Dict, Tuple
+from typing import List, Set, Dict, Tuple, TYPE_CHECKING
 from itertools import permutations
 from datetime import datetime
 from loguru import logger
@@ -8,7 +8,13 @@ from models import (
     TradingPair, TriangularPath, ArbitrageOpportunity,
     TradeDirection, MarketSnapshot
 )
-from config import config
+from config import config, TradingConfig
+
+# Import moved after models to avoid circular dependency
+if TYPE_CHECKING:
+    from exchange_client import ExchangeClient
+else:
+    ExchangeClient = None
 
 
 class ArbitrageEngine:
@@ -21,7 +27,7 @@ class ArbitrageEngine:
     ):
         """Initialise arbitrage engine."""
         self.exchange = exchange_client
-        self.base_currencies = set(config.trading.base_currencies)
+        self.base_currencies = set(config.base_currencies)
         self.trading_pairs_map: Dict[str, TradingPair] = {}
         self.triangular_paths: List[List[str]] = []
         
