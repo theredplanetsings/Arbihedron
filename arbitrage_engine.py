@@ -10,7 +10,7 @@ from models import (
 )
 from config import config, TradingConfig
 
-# Import moved after models to avoid circular dependency
+# import after models to avoid circular dependency issues
 if TYPE_CHECKING:
     from exchange_client import ExchangeClient
 else:
@@ -39,7 +39,7 @@ class ArbitrageEngine:
     
     def _discover_triangular_paths(self):
         """Discover all possible triangular arbitrage paths."""
-        # Get all available trading pairs
+        # get all available trading pairs
         available_pairs = set()
         currency_graph: Dict[str, Set[str]] = {}
         
@@ -48,7 +48,7 @@ class ArbitrageEngine:
                 base, quote = symbol.split('/')
                 available_pairs.add((base, quote))
                 
-                # Build adjacency graph
+                # build a graph of which currencies connect to each other
                 if base not in currency_graph:
                     currency_graph[base] = set()
                 if quote not in currency_graph:
@@ -60,24 +60,24 @@ class ArbitrageEngine:
             except ValueError:
                 continue
         
-        # Find triangular paths starting from each base currency
+        # find triangular paths starting from each base currency
         paths = set()
         
         for start_currency in self.base_currencies:
             if start_currency not in currency_graph:
                 continue
             
-            # Find all currencies reachable from start
+            # find all currencies we can reach from start
             for mid_currency in currency_graph[start_currency]:
                 if mid_currency == start_currency:
                     continue
                 
-                # Find currencies that can complete the triangle
+                # find currencies that can complete the triangle back to start
                 for end_currency in currency_graph.get(mid_currency, set()):
                     if end_currency == start_currency or end_currency == mid_currency:
                         continue
                     
-                    # Check if we can get back to start
+                    # check if we can get back to where we started
                     if start_currency in currency_graph.get(end_currency, set()):
                         path = (start_currency, mid_currency, end_currency, start_currency)
                         paths.add(path)
@@ -89,7 +89,7 @@ class ArbitrageEngine:
         self, from_currency: str, to_currency: str
     ) -> Tuple[str, TradeDirection]:
         """Determine trading pair symbol and direction."""
-        # Try direct pair
+        # try the direct pair first
         symbol_direct = f"{from_currency}/{to_currency}"
         symbol_inverse = f"{to_currency}/{from_currency}"
         
@@ -109,7 +109,7 @@ class ArbitrageEngine:
         directions_used = []
         total_fees = 0.0
         
-        # Execute virtual trades along the path
+        # simulate trades along the path
         for i in range(len(path) - 1):
             from_curr = path[i]
             to_curr = path[i + 1]
@@ -117,36 +117,36 @@ class ArbitrageEngine:
             symbol, direction = self._get_symbol_and_direction(from_curr, to_curr)
             
             if not symbol or symbol not in self.trading_pairs_map:
-                # Path not available
+                # path isn't available right now
                 return None
             
             pair = self.trading_pairs_map[symbol]
             pairs_used.append(pair)
             directions_used.append(direction)
             
-            # Calculate trade
+            # work out the trade details
             fee_rate = self.exchange.get_trading_fee(symbol)
             
             if direction == TradeDirection.BUY:
-                # Buying base with quote (spending to_curr to get from_curr)
-                # We have 'amount' of from_curr (quote), buying to_curr (base)
-                price = pair.ask  # We pay ask price when buying
+                # buying base with quote (spending to_curr to get from_curr)
+                # we have 'amount' of from_curr (quote), buying to_curr (base)
+                price = pair.ask  # pay ask price when buying
                 if price == 0:
                     return None
                 amount_before_fee = amount / price
                 fee = amount_before_fee * fee_rate
                 amount = amount_before_fee - fee
             else:
-                # Selling base for quote (selling from_curr to get to_curr)
-                # We have 'amount' of from_curr (base), selling for to_curr (quote)
-                price = pair.bid  # We receive bid price when selling
+                # selling base for quote (selling from_curr to get to_curr)
+                # we have 'amount' of from_curr (base), selling for to_curr (quote)
+                price = pair.bid  # receive bid price when selling
                 amount_before_fee = amount * price
                 fee = amount_before_fee * fee_rate
                 amount = amount_before_fee - fee
             
             total_fees += fee * price if direction == TradeDirection.SELL else fee
         
-        # Calculate profit
+        # work out how much we made (or lost)
         profit_amount = amount - start_amount
         profit_percentage = (profit_amount / start_amount) * 100
         
@@ -164,7 +164,7 @@ class ArbitrageEngine:
         """Scan for arbitrage opportunities across all triangular paths."""
         timestamp = datetime.now()
         
-        # Get list of all unique symbols needed
+        # figure out which symbols we need to check
         symbols_needed = set()
         for path in self.triangular_paths:
             for i in range(len(path) - 1):
@@ -173,14 +173,14 @@ class ArbitrageEngine:
                 symbols_needed.add(f"{from_curr}/{to_curr}")
                 symbols_needed.add(f"{to_curr}/{from_curr}")
         
-        # Fetch all tickers
+        # grab all the current prices
         symbols_list = [s for s in symbols_needed if s in self.exchange.markets]
         trading_pairs = await self.exchange.fetch_tickers_batch(symbols_list)
         
-        # Update trading pairs map
+        # update our map with fresh data
         self.trading_pairs_map = {pair.symbol: pair for pair in trading_pairs}
         
-        # Calculate opportunities for each path
+        # check each path for profitable opportunities
         opportunities = []
         
         for path in self.triangular_paths:
@@ -190,10 +190,10 @@ class ArbitrageEngine:
             )
             
             if triangular_path and triangular_path.profit_percentage > 0:
-                # Calculate risk score (simplified)
+                # figure out how risky this looks
                 risk_score = self._calculate_risk_score(triangular_path)
                 
-                # Check if executable
+                # check if it's worth executing
                 executable = triangular_path.profit_percentage >= config.trading.min_profit_threshold
                 
                 opportunity = ArbitrageOpportunity(
@@ -208,7 +208,7 @@ class ArbitrageEngine:
                 if executable:
                     opportunities.append(opportunity)
         
-        # Sort by profit percentage
+        # sort by best profit first
         opportunities.sort(key=lambda x: x.path.profit_percentage, reverse=True)
         
         logger.info(f"Found {len(opportunities)} executable opportunities")
@@ -223,18 +223,18 @@ class ArbitrageEngine:
         """Calculate risk score for a path (0-100, lower is better)."""
         risk = 0.0
         
-        # Spread risk
+        # wider spreads = more risk
         avg_spread = sum(p.spread for p in path.pairs) / len(path.pairs)
         risk += avg_spread * 10
         
-        # Liquidity risk
+        # low liquidity = more risk
         min_volume = min(p.bid_volume + p.ask_volume for p in path.pairs)
         if min_volume < 10000:
             risk += 20
         elif min_volume < 50000:
             risk += 10
         
-        # Path complexity (always 3 steps for triangular)
+        # triangular paths always have 3 steps
         risk += 5
         
         return min(risk, 100.0)

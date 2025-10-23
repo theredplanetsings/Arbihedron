@@ -31,7 +31,7 @@ class ExchangeClient:
                 }
             })
             
-            # Only enable sandbox/testnet if exchange supports it
+            # enable sandbox/testnet if the exchange supports it
             if self.config.testnet:
                 try:
                     self.exchange.set_sandbox_mode(True)
@@ -84,7 +84,7 @@ class ExchangeClient:
         tasks = [self.fetch_ticker(symbol) for symbol in symbols]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Filter out None and exceptions
+        # filter out failures and get just the good ones
         valid_pairs = [r for r in results if isinstance(r, TradingPair)]
         logger.debug(f"Fetched {len(valid_pairs)}/{len(symbols)} tickers")
         
@@ -145,7 +145,7 @@ class ExchangeClient:
         try:
             if symbol in self.markets:
                 return float(self.markets[symbol].get('taker', 0.001))
-            return 0.001  # Default 0.1%
+            return 0.001  # default to 0.1% if we can't find it
         except Exception as e:
             logger.debug(f"Failed to get fee for {symbol}: {e}")
             return 0.001

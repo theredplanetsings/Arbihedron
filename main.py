@@ -6,29 +6,26 @@ from datetime import datetime
 from loguru import logger
 from rich.live import Live
 from rich.console import Console
-
 from config import config
 from exchange_client import ExchangeClient
 from arbitrage_engine import ArbitrageEngine
 from executor import TradeExecutor
 from monitor import ArbitrageMonitor
 
-
 class ArbihedronBot:
     """Main arbitrage bot orchestrator."""
-    
     def __init__(self):
         """Initialise the bot."""
         self.config = config
         
-        # Initialise components
+        # get all the main components set up
         self.exchange = ExchangeClient(config.exchange)
         self.engine = ArbitrageEngine(self.exchange, config.trading)
         self.executor = TradeExecutor(self.exchange, config.risk)
         self.monitor = ArbitrageMonitor()
         self.console = Console()
         
-        # Setup logging
+        # configure logging to file
         logger.add(
             "logs/arbihedron_{time}.log",
             rotation="1 day",
@@ -57,32 +54,32 @@ class ArbihedronBot:
     
     async def scan_and_execute_loop(self):
         """Main loop: scan for opportunities and execute."""
-        scan_interval = 1.0  # Scan every second for high-frequency
+        scan_interval = 1.0  # check for opportunities every second
         
         while self.running:
             try:
-                # Scan for opportunities
+                # look for arbitrage opportunities
                 snapshot = await self.engine.scan_opportunities()
                 self.monitor.update_snapshot(snapshot)
                 
-                # Execute top opportunities
-                for opportunity in snapshot.opportunities[:3]:  # Top 3
+                # execute the best ones we find
+                for opportunity in snapshot.opportunities[:3]:  # just take top 3
                     if opportunity.executable:
                         self.monitor.log_opportunity(opportunity)
                         
-                        # Execute the trade
+                        # run the trade
                         execution = await self.executor.execute_opportunity(opportunity)
                         self.monitor.log_execution(execution)
                         
-                        # Small delay between executions
+                        # brief pause between trades
                         await asyncio.sleep(0.1)
                 
-                # Wait before next scan
+                # wait before scanning again
                 await asyncio.sleep(scan_interval)
                 
             except Exception as e:
                 logger.error(f"Error in main loop: {e}")
-                await asyncio.sleep(5)  # Wait longer on error
+                await asyncio.sleep(5)  # give it a bit longer if something went wrong
     
     async def display_loop(self):
         """Display loop: update dashboard."""
@@ -109,10 +106,10 @@ class ArbihedronBot:
         self.running = True
         
         try:
-            # Initialise
+            # get everything started
             await self.initialize()
             
-            # Run both loops concurrently
+            # run both the scanning and display at the same time
             await asyncio.gather(
                 self.scan_and_execute_loop(),
                 self.display_loop()
@@ -130,10 +127,10 @@ class ArbihedronBot:
         logger.info("Shutting down Arbihedron...")
         self.running = False
         
-        # Close exchange connection
+        # close the exchange connection properly
         self.exchange.close()
         
-        # Print final statistics
+        # show the final stats
         stats = self.executor.get_statistics()
         
         self.console.print("\n[bold cyan]Final Statistics:[/]")
@@ -148,7 +145,7 @@ async def main():
     """Main entry point."""
     bot = ArbihedronBot()
     
-    # Setup signal handlers
+    # handle ctrl+c and kill signals gracefully
     loop = asyncio.get_event_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(

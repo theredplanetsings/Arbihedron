@@ -52,5 +52,5 @@ class Config(BaseModel):
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
 
 
-# Global config instance
+# single global config instance that everything uses
 config = Config()

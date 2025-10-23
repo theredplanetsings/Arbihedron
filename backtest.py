@@ -26,7 +26,7 @@ class ArbitrageBacktest:
         initial_capital: float = 10000.0
     ) -> Dict:
         """Run backtest on historical data."""
-        # Initialize components if needed
+        # set up components if we haven't already
         if self.engine is None:
             from exchange_client import ExchangeClient
             from arbitrage_engine import ArbitrageEngine
@@ -43,15 +43,15 @@ class ArbitrageBacktest:
         num_simulations = 100
         
         for i in range(num_simulations):
-            # Scan for opportunities
+            # look for opportunities in the market
             snapshot = await self.engine.scan_opportunities()
             
             if snapshot.opportunities:
-                # Simulate executing best opportunity
+                # pretend we execute the best one
                 best_opp = snapshot.opportunities[0]
                 
-                # Simulate execution with slippage
-                simulated_slippage = 0.1  # 0.1% slippage
+                # account for slippage in the simulation
+                simulated_slippage = 0.1  # assume 0.1% slippage
                 actual_profit = best_opp.expected_profit * (1 - simulated_slippage / 100)
                 
                 capital += actual_profit
@@ -66,10 +66,10 @@ class ArbitrageBacktest:
                 
                 logger.info(f"Sim {i+1}: Profit ${actual_profit:.2f} | Capital: ${capital:.2f}")
             
-            # Wait between simulations
+            # pause between scans
             await asyncio.sleep(0.5)
         
-        # Calculate results
+        # crunch the numbers
         results = self._calculate_results(initial_capital, capital)
         self._display_results(results)
         

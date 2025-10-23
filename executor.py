@@ -28,7 +28,7 @@ class TradeExecutor:
         """Execute a triangular arbitrage opportunity."""
         execution_start = datetime.now()
         
-        # Check rate limiting
+        # make sure we're not hitting rate limits
         if not self._check_rate_limit():
             logger.warning("Rate limit exceeded, skipping trade")
             return TradeExecution(
@@ -41,7 +41,7 @@ class TradeExecutor:
                 error_message="Rate limit exceeded"
             )
         
-        # Validate opportunity is still valid
+        # double check the opportunity is still good
         if not opportunity.executable:
             logger.warning(f"Opportunity no longer executable: {opportunity.reason}")
             return TradeExecution(
@@ -54,7 +54,7 @@ class TradeExecutor:
                 error_message=opportunity.reason
             )
         
-        # Execute the trades in sequence
+        # run through the trades one by one
         trades_executed = []
         current_amount = opportunity.path.start_amount
         success = True
@@ -69,22 +69,22 @@ class TradeExecutor:
                     f"with {current_amount:.4f}"
                 )
                 
-                # Calculate trade amount
+                # work out how much to trade
                 if direction == TradeDirection.BUY:
-                    # Buying base with quote currency
+                    # buying base with quote currency
                     trade_amount = current_amount / pair.ask
                     price = pair.ask
                 else:
-                    # Selling base for quote currency
+                    # selling base for quote currency
                     trade_amount = current_amount
                     price = pair.bid
                 
-                # Execute order
+                # execute the order
                 order = await self.exchange.execute_order(
                     symbol=pair.symbol,
                     side=direction,
                     amount=trade_amount,
-                    price=None  # Market order for speed
+                    price=None  # use market orders for speed
                 )
                 
                 trades_executed.append({
@@ -97,23 +97,23 @@ class TradeExecutor:
                     'status': order.get('status')
                 })
                 
-                # Update current amount for next trade
+                # figure out how much we have now for the next trade
                 filled_amount = float(order.get('filled', trade_amount))
                 
                 if direction == TradeDirection.BUY:
                     current_amount = filled_amount
                 else:
-                    # For sell orders, we get quote currency
+                    # for sell orders, we get quote currency back
                     avg_price = float(order.get('average', price))
                     current_amount = filled_amount * avg_price
                 
-                # Apply fees
+                # take fees into account
                 fee_rate = self.exchange.get_trading_fee(pair.symbol)
                 current_amount *= (1 - fee_rate)
                 
                 logger.info(f"After step {i+1}: {current_amount:.4f}")
             
-            # Calculate actual profit
+            # see how much we actually made
             actual_profit = current_amount - opportunity.path.start_amount
             slippage = (
                 (actual_profit - opportunity.expected_profit) / 
@@ -152,7 +152,7 @@ class TradeExecutor:
         """Check if we're within rate limits."""
         now = datetime.now()
         
-        # Reset counter every hour
+        # reset the counter every hour
         if (now - self.last_reset).total_seconds() > 3600:
             self.trades_this_hour = 0
             self.last_reset = now

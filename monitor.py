@@ -30,7 +30,7 @@ class ArbitrageMonitor:
             Layout(name="stats", size=10)
         )
         
-        # Header
+        # show basic info at the top
         runtime = datetime.now() - self.start_time
         header_text = (
             f"🔺 ARBIHEDRON - Triangular Arbitrage Monitor\n"
@@ -39,7 +39,7 @@ class ArbitrageMonitor:
         )
         layout["header"].update(Panel(header_text, style="bold cyan"))
         
-        # Opportunities table
+        # list the best opportunities we've found
         if snapshot and snapshot.opportunities:
             opps_table = self._create_opportunities_table(snapshot.opportunities[:10])
             layout["opportunities"].update(Panel(opps_table, title="Top Opportunities"))
@@ -48,7 +48,7 @@ class ArbitrageMonitor:
                 Panel("No opportunities detected...", title="Top Opportunities")
             )
         
-        # Statistics
+        # show execution stats
         stats_table = self._create_stats_table(stats)
         layout["stats"].update(Panel(stats_table, title="Execution Statistics"))
         
