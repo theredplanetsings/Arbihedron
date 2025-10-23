@@ -10,7 +10,7 @@ def test_models():
     """Test data models."""
     print("Testing data models...")
     
-    # Test TradingPair
+    # check if TradingPair works
     pair = TradingPair(
         symbol="BTC/USDT",
         base="BTC",
@@ -25,7 +25,7 @@ def test_models():
     assert pair.spread > 0
     print(f"✓ TradingPair spread: {pair.spread:.4f}%")
     
-    # Test TriangularPath
+    # check if TriangularPath works
     path = TriangularPath(
         path=["BTC", "ETH", "USDT", "BTC"],
         pairs=[pair, pair, pair],
@@ -69,11 +69,11 @@ async def test_exchange_client():
         client = ExchangeClient()
         print(f"✓ Exchange client initialized: {client.exchange.name}")
         
-        # Test loading markets
+        # see if we can load markets
         markets = await client.load_markets()
         print(f"✓ Loaded {len(markets)} markets")
         
-        # Test fetching a ticker
+        # try fetching a ticker
         if "BTC/USDT" in markets:
             ticker = await client.fetch_ticker("BTC/USDT")
             if ticker:
@@ -107,7 +107,7 @@ async def test_arbitrage_engine():
             sample_path = engine.triangular_paths[0]
             print(f"✓ Sample path: {' → '.join(sample_path)}")
         
-        # Test scanning (might fail without valid API)
+        # try scanning for opportunities (might not work without API keys)
         try:
             snapshot = await engine.scan_opportunities()
             print(f"✓ Scanned and found {len(snapshot.opportunities)} opportunities")
@@ -130,19 +130,19 @@ def test_utils():
         validate_trading_pair, parse_symbol
     )
     
-    # Test formatting
+    # check formatting functions
     assert format_currency(1234.56) == "$1,234.56"
     print("✓ Currency formatting")
     
     assert format_percentage(12.345) == "12.35%"
     print("✓ Percentage formatting")
     
-    # Test validation
+    # check validation
     assert validate_trading_pair("BTC/USDT") == True
     assert validate_trading_pair("INVALID") == False
     print("✓ Trading pair validation")
     
-    # Test parsing
+    # check parsing
     base, quote = parse_symbol("ETH/BTC")
     assert base == "ETH" and quote == "BTC"
     print("✓ Symbol parsing")
@@ -157,12 +157,12 @@ async def run_all_tests():
     print("=" * 50)
     print()
     
-    # Basic tests (no network required)
+    # basic tests that don't need network access
     test_models()
     test_config()
     test_utils()
     
-    # Network tests (require exchange API)
+    # tests that need to connect to exchanges
     print("=" * 50)
     print("NETWORK TESTS (May require API credentials)")
     print("=" * 50)
