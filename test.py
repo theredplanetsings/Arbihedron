@@ -66,7 +66,7 @@ async def test_exchange_client():
     try:
         from exchange_client import ExchangeClient
         
-        client = ExchangeClient()
+        client = ExchangeClient(config.exchange)
         print(f"✓ Exchange client initialized: {client.exchange.name}")
         
         # see if we can load markets
@@ -97,8 +97,8 @@ async def test_arbitrage_engine():
         from exchange_client import ExchangeClient
         from arbitrage_engine import ArbitrageEngine
         
-        client = ExchangeClient()
-        engine = ArbitrageEngine(client)
+        client = ExchangeClient(config.exchange)
+        engine = ArbitrageEngine(client, config.trading)
         
         await engine.initialize()
         print(f"✓ Engine initialized with {len(engine.triangular_paths)} paths")
@@ -177,4 +177,8 @@ async def run_all_tests():
 
 
 if __name__ == "__main__":
-    asyncio.run(run_all_tests())
+    try:
+        asyncio.run(run_all_tests())
+    except KeyboardInterrupt:
+        print("\n\nStopping tests...")
+        print("Done!")
