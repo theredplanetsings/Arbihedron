@@ -15,6 +15,9 @@ class ArbitrageBacktest:
     def __init__(self, exchange_name: str = "kraken"):
         """Initialise backtester."""
         self.exchange_name = exchange_name
+        self.exchange = None
+        self.engine = None
+        self.trades = []
     
     async def run_historical_test(
         self,
@@ -23,6 +26,16 @@ class ArbitrageBacktest:
         initial_capital: float = 10000.0
     ) -> Dict:
         """Run backtest on historical data."""
+        # Initialize components if needed
+        if self.engine is None:
+            from exchange_client import ExchangeClient
+            from arbitrage_engine import ArbitrageEngine
+            from config import config
+            
+            self.exchange = ExchangeClient(config.exchange)
+            self.engine = ArbitrageEngine(self.exchange, config.trading)
+            await self.engine.initialize()
+        
         logger.info(f"Starting backtest from {start_date} to {end_date}")
         logger.warning("Note: Using current market data as historical data not available")
         
@@ -115,21 +128,29 @@ async def main():
     """Run backtest."""
     from exchange_client import ExchangeClient
     from arbitrage_engine import ArbitrageEngine
+    from config import config
     
-    exchange = ExchangeClient()
-    engine = ArbitrageEngine(exchange)
+    exchange = ExchangeClient(config.exchange)
+    engine = ArbitrageEngine(exchange, config.trading)
     
     await engine.initialize()
     
-    backtester = ArbitrageBacktest(exchange, engine)
+    backtester = ArbitrageBacktest(config.exchange.name)
     
     start_date = datetime.now() - timedelta(days=30)
     end_date = datetime.now()
     
-    results = await backtester.run_historical_test(start_date, end_date)
-    
-    exchange.close()
+    try:
+        results = await backtester.run_historical_test(start_date, end_date)
+    except KeyboardInterrupt:
+        logger.info("Backtest interrupted by user")
+    finally:
+        if backtester.exchange:
+            backtester.exchange.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n✓ Backtest stopped by user")
