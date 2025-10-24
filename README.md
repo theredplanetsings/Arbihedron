@@ -1,21 +1,22 @@
 # Arbihedron 🔺
 
-**High-frequency triangular arbitrage system for cryptocurrency and forex markets**
+High-frequency triangular arbitrage system for cryptocurrency markets.
 
-> **PAPER TRADING BY DEFAULT** - This system starts in simulation mode. No real trades are executed until you explicitly enable live trading and provide API keys with trading permissions.
+**Paper trading by default** - runs in simulation mode until you explicitly enable live trading.
 
-Arbihedron automatically detects and exploits price discrepancies in currency pairs through circular trading paths (A→B→C→A), capturing low-risk profit opportunities within single exchanges.
+Detects and exploits price discrepancies through circular trading paths (A→B→C→A), capturing profit opportunities within single exchanges.
 
 ## Features
 
-- **Triangular Arbitrage Detection** - Automatically discovers profitable circular trading paths
-- **Real-time Market Scanning** - High-frequency price monitoring across multiple trading pairs
-- **Multi-Exchange Support** - Works with Binance, Coinbase, Kraken, and more (via CCXT)
-- **Risk Management** - Built-in position sizing, slippage tolerance, and rate limiting
-- **Paper Trading Mode** - Test strategies without risking real capital
-- **Live Dashboard** - Beautiful real-time monitoring with Rich terminal UI
-- **Backtesting Engine** - Test strategies on historical data
-- **Automated Execution** - Fast order execution with minimal latency
+- **Triangular arbitrage detection** - discovers profitable circular trading paths
+- **Real-time market scanning** - high-frequency price monitoring
+- **Multi-exchange support** - Binance, Coinbase, Kraken via CCXT
+- **Risk management** - position sizing, slippage tolerance, rate limiting
+- **Paper trading mode** - test strategies without risking capital
+- **Live dashboard** - real-time monitoring with Rich terminal UI
+- **Backtesting engine** - test strategies on historical data
+- **Monitoring & alerts** - email/Slack notifications, health endpoints
+- **Persistence layer** - SQLite database for trade history and analytics
 
 ## How It Works
 
@@ -25,13 +26,13 @@ Triangular arbitrage exploits price inefficiencies between three currency pairs:
 BTC/USDT → ETH/BTC → ETH/USDT → BTC/USDT
 ```
 
-If the compound exchange rate after fees exceeds 1.0, there's a profit opportunity!
+If the compound exchange rate after fees exceeds 1.0, profit opportunity exists.
 
 **Example:**
 1. Start with 1 BTC
-2. Trade BTC → ETH at current rate
-3. Trade ETH → USDT at current rate  
-4. Trade USDT → BTC at current rate
+2. Trade BTC → ETH
+3. Trade ETH → USDT
+4. Trade USDT → BTC
 5. End with 1.005 BTC (0.5% profit)
 
 ## Quick Start
@@ -63,37 +64,41 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-2. Edit `.env` with your settings:
+2. Edit `.env`:
 ```bash
-# Exchange Configuration
+# exchange configuration
 EXCHANGE_NAME=binance
 API_KEY=your_api_key_here
 API_SECRET=your_api_secret_here
 
-# Trading Parameters
-MIN_PROFIT_THRESHOLD=0.5    # Minimum 0.5% profit
+# trading parameters
+MIN_PROFIT_THRESHOLD=0.5    # minimum 0.5% profit
 MAX_POSITION_SIZE=1000      # $1000 per trade
 SLIPPAGE_TOLERANCE=0.1      # 0.1% slippage
 
-# Safety First!
-ENABLE_PAPER_TRADING=true   # KEEP THIS TRUE FOR TESTING
+# safety first
+ENABLE_PAPER_TRADING=true   # keep true for testing
+
+# alerts (optional)
+ALERT_EMAIL=your@email.com
+ALERT_SLACK_WEBHOOK=https://hooks.slack.com/...
 ```
 
 ### Running the Bot
 
-**Paper Trading Mode (DEFAULT - Recommended for testing):**
+**Paper trading mode (default):**
 
-The bot runs in **simulation mode** by default. No real money is at risk:
-- Discovers real market opportunities
-- Simulates trade execution
-- Calculates potential profits
-- No actual orders are placed
+Runs in simulation mode by default - no real money at risk:
+- discovers real market opportunities
+- simulates trade execution
+- calculates potential profits
+- no actual orders placed
 
 ```bash
 python main.py
 ```
 
-**Simple Example:**
+**Examples:**
 ```bash
 python examples.py
 ```
@@ -103,31 +108,52 @@ python examples.py
 python backtest.py
 ```
 
-**CAUTION: Switching to LIVE Trading (Advanced Users Only):**
+**Service mode with auto-restart:**
+```bash
+./arbi start      # start as background service
+./arbi status     # check service status
+./arbi logs       # view logs
+./arbi stop       # stop service
+```
 
-Only enable live trading after thorough testing:
-1. Obtain API keys from your exchange with **trading permissions**
+**Health monitoring:**
+```bash
+# HTTP endpoints available at localhost:8080
+curl http://localhost:8080/health
+curl http://localhost:8080/metrics
+curl http://localhost:8080/status
+```
+
+**Live trading (advanced):**
+
+Only enable after thorough testing:
+1. Obtain API keys with trading permissions
 2. Set `ENABLE_PAPER_TRADING=false` in `.env`
-3. Add your real `API_KEY` and `API_SECRET`
+3. Add real `API_KEY` and `API_SECRET`
 4. Start with small position sizes
-5. Monitor closely for the first 24 hours
+5. Monitor closely
 
 ## Project Structure
 
 ```
 Arbihedron/
-├── main.py                 # Main bot orchestrator
-├── config.py              # Configuration management
-├── models.py              # Data models
-├── exchange_client.py     # Exchange API integration
-├── arbitrage_engine.py    # Core arbitrage detection
-├── executor.py            # Trade execution engine
-├── monitor.py             # Real-time monitoring & UI
-├── backtest.py            # Backtesting framework
-├── utils.py               # Utility functions
-├── examples.py            # Usage examples
-├── requirements.txt       # Python dependencies
-└── .env.example          # Configuration template
+├── main.py                 # main bot orchestrator
+├── config.py              # configuration management
+├── models.py              # data models
+├── exchange_client.py     # exchange API integration
+├── arbitrage_engine.py    # core arbitrage detection
+├── executor.py            # trade execution engine
+├── monitor.py             # real-time monitoring & UI
+├── backtest.py            # backtesting framework
+├── database.py            # SQLite persistence layer
+├── analytics.py           # performance analytics
+├── alerts.py              # email/Slack notifications
+├── health_monitor.py      # HTTP health endpoints
+├── arbihedron_service.py  # service wrapper with auto-restart
+├── arbi                   # service control script
+├── utils.py               # utility functions
+├── examples.py            # usage examples
+└── requirements.txt       # dependencies
 ```
 
 ## Usage Examples
@@ -168,138 +194,156 @@ asyncio.run(run())
 
 ## Configuration Options
 
-All trading parameters can be configured via environment variables in `.env` or directly in `config.py`.
+Trading parameters configured via `.env` or `config.py`.
 
-### Environment Variables (`.env` file)
+### Environment Variables
 
-| Parameter | Description | Default | Location |
-|-----------|-------------|---------|----------|
-| `EXCHANGE_NAME` | Exchange to use (binance, kraken, etc.) | kraken | `.env` |
-| `MIN_PROFIT_THRESHOLD` | Minimum profit % to execute trade | 0.5 | `.env` |
-| `MAX_POSITION_SIZE` | Maximum USD per trade | 1000 | `.env` |
-| `SLIPPAGE_TOLERANCE` | Expected slippage % | 0.1 | `.env` |
-| `ENABLE_PAPER_TRADING` | Paper trading mode (true/false) | true | `.env` |
-| `MAX_TRADES_PER_HOUR` | Maximum trades allowed per hour | 100 | `.env` |
-| `STOP_LOSS_PERCENTAGE` | Stop loss threshold % | 2.0 | `.env` |
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `EXCHANGE_NAME` | Exchange to use | kraken |
+| `MIN_PROFIT_THRESHOLD` | Minimum profit % | 0.5 |
+| `MAX_POSITION_SIZE` | Maximum USD per trade | 1000 |
+| `SLIPPAGE_TOLERANCE` | Expected slippage % | 0.1 |
+| `ENABLE_PAPER_TRADING` | Paper trading mode | true |
+| `MAX_TRADES_PER_HOUR` | Rate limit | 100 |
+| `STOP_LOSS_PERCENTAGE` | Stop loss threshold % | 2.0 |
+| `ALERT_EMAIL` | Email for alerts | - |
+| `ALERT_SLACK_WEBHOOK` | Slack webhook URL | - |
 
 ### Trading Algorithm Parameters
 
-The core trading logic uses these key parameters:
+Core trading logic parameters:
 
-**Signal Generation** (`arbitrage_engine.py` - line 196):
-- **BUY SIGNAL**: Triggered when `profit_percentage >= MIN_PROFIT_THRESHOLD`
-- **Minimum Profit**: 0.5% (configurable via `MIN_PROFIT_THRESHOLD`)
-- **After Fees**: Profit calculated after all exchange fees
+**Signal generation** (`arbitrage_engine.py`):
+- **Buy signal**: `profit_percentage >= MIN_PROFIT_THRESHOLD`
+- **Minimum profit**: 0.5% (configurable)
+- **After fees**: profit calculated post-fees
 
-**Risk Scoring** (`arbitrage_engine.py` - line 220):
-- **Spread Risk**: Wider bid-ask spreads increase risk score
-- **Liquidity Risk**: Low volume pairs (<$10k) get +20 risk, medium (<$50k) get +10
-- **Path Complexity**: Triangular paths have base +5 risk
-- **Risk Range**: 0-100 (lower is better)
+**Risk scoring** (`arbitrage_engine.py`):
+- **Spread risk**: wider bid-ask spreads increase risk
+- **Liquidity risk**: low volume pairs penalised
+- **Path complexity**: triangular paths base +5 risk
+- **Risk range**: 0-100 (lower is better)
 
-**Execution Rules** (`executor.py`):
-- **Rate Limiting**: Max 100 trades/hour (prevents over-trading)
-- **Order Type**: Market orders for speed
-- **Sequential Execution**: 3-leg trades executed in order
-- **Validation**: Re-checks opportunity before execution
+**Execution rules** (`executor.py`):
+- **Rate limiting**: max 100 trades/hour
+- **Order type**: market orders
+- **Sequential execution**: 3-leg trades in order
+- **Validation**: re-checks before execution
 
-### How to Change Trading Parameters
+### Modifying Trading Parameters
 
-**Option 1: Edit `.env` file (Recommended)**
+**Edit `.env` (recommended):**
 ```bash
-# Increase profit threshold to 1%
+# increase profit threshold to 1%
 MIN_PROFIT_THRESHOLD=1.0
 
-# Reduce position size to $500
+# reduce position size to $500
 MAX_POSITION_SIZE=500
 
-# Tighten rate limiting
+# tighten rate limiting
 MAX_TRADES_PER_HOUR=50
 ```
 
-**Option 2: Edit `config.py` directly**
+**Edit `config.py`:**
 ```python
 class TradingConfig(BaseModel):
-    min_profit_threshold: float = Field(default=1.0)  # Change here
-    max_position_size: float = Field(default=500)     # Or here
+    min_profit_threshold: float = Field(default=1.0)
+    max_position_size: float = Field(default=500)
 ```
 
-**Option 3: Modify Risk Scoring** (`arbitrage_engine.py` line 220+)
+**Modify risk scoring** (`arbitrage_engine.py`):
 ```python
 def _calculate_risk_score(self, path: TriangularPath) -> float:
     risk = 0.0
-    
-    # Adjust these multipliers to change risk sensitivity
     avg_spread = sum(p.spread for p in path.pairs) / len(path.pairs)
-    risk += avg_spread * 10  # Lower = less spread-sensitive
+    risk += avg_spread * 10  # adjust multiplier
     
-    # Modify volume thresholds
     min_volume = min(p.bid_volume + p.ask_volume for p in path.pairs)
-    if min_volume < 5000:   # Change threshold here
-        risk += 30          # Increase penalty for low liquidity
+    if min_volume < 5000:    # adjust threshold
+        risk += 30           # adjust penalty
 ```
 
-### Base Currencies for Triangular Paths
-
-Edit in `config.py`:
+**Base currencies** (`config.py`):
 ```python
 base_currencies: List[str] = Field(
-    default=["BTC", "ETH", "BNB", "USDT", "USDC", "SOL"]  # Add/remove currencies
+    default=["BTC", "ETH", "BNB", "USDT", "USDC", "SOL"]
 )
 ```
 
 ## Risk Management
 
-**Important Safety Features:**
+Safety features:
 
-- Paper Trading Mode - Test without real money
-- Position Limits - Maximum size per trade
-- Rate Limiting - Prevents over-trading
-- Slippage Protection - Accounts for execution costs
-- Fee Calculation - Includes all trading fees
-- Risk Scoring - Evaluates opportunity safety
+- paper trading mode - test without real money
+- position limits - maximum size per trade
+- rate limiting - prevents over-trading
+- slippage protection - accounts for execution costs
+- fee calculation - includes all trading fees
+- risk scoring - evaluates opportunity safety
+- auto-restart - recovers from crashes
+- health monitoring - tracks system status
 
-## Performance Metrics
+## Monitoring & Alerts
 
-The bot tracks:
-- Total trades executed
-- Success rate
-- Total profit/loss
-- Average profit per trade
-- Average slippage
-- Sharpe ratio
+**Health endpoints:**
+- `GET /health` - basic health check
+- `GET /metrics` - system metrics (CPU, RAM, uptime)
+- `GET /status` - detailed status with trading stats
+
+**Notifications:**
+- email alerts via SMTP
+- Slack webhooks
+- configurable alert types (startup, crash, opportunities, executions)
+- quiet hours support
+- rate limiting
+
+**Analytics:**
+- trade history in SQLite database
+- performance metrics
+- profit/loss tracking
+- session-based analytics
+
+**View data:**
+```bash
+python view_data.py          # interactive data browser
+python analytics.py          # generate reports
+```
+
+## Performance Tracking
+
+Tracked metrics:
+- total trades executed
+- success rate
+- total profit/loss
+- average profit per trade
+- average slippage
+- sharpe ratio
+- opportunities per hour
 
 ## Disclaimer
 
-**This software is for educational purposes only.**
+This software is for educational purposes only.
 
-Cryptocurrency trading carries significant risk. Never trade with money you cannot afford to lose. Past performance does not guarantee future results.
+Cryptocurrency trading carries significant risk. Never trade with money you cannot afford to lose.
 
-**Key Risks:**
-- Market volatility
-- Execution delays (latency)
-- Slippage exceeding estimates
+**Key risks:**
+- market volatility
+- execution delays (latency)
+- slippage exceeding estimates
 - API failures
-- Exchange downtime
-- Network congestion
+- exchange downtime
+- network congestion
 
 **Always:**
-- Start with paper trading
-- Test thoroughly before going live
-- Use small position sizes
-- Monitor closely
-- Understand exchange fees
-- Have proper risk management
+- start with paper trading
+- test thoroughly
+- use small position sizes
+- monitor closely
+- understand exchange fees
+- implement proper risk management
 
 ## Advanced Features
-
-### Custom Trading Pairs
-
-## Advanced Configuration
-
-Edit `config.py` to customise base currencies:
-
-```python
 
 ### Backtesting
 
@@ -307,39 +351,47 @@ Edit `config.py` to customise base currencies:
 python backtest.py
 ```
 
-Simulates trading on recent market data to evaluate strategy performance.
+Simulates trading on historical market data.
 
-### Multi-Exchange Arbitrage
+### Service Control
 
-While this version focuses on single-exchange triangular arbitrage, the architecture can be extended for cross-exchange arbitrage.
+```bash
+./arbi start      # start background service
+./arbi stop       # stop service
+./arbi restart    # restart service
+./arbi status     # check status
+./arbi logs       # view logs
+./arbi install    # install as LaunchAgent (macOS)
+./arbi uninstall  # remove LaunchAgent
+```
+
+### Testing
+
+```bash
+python test.py            # test core components
+python test_database.py   # test persistence
+python test_alerts.py     # test notifications
+```
 
 ## Contributing
 
-Contributions welcome! Areas for improvement:
+Contributions welcome. Areas for improvement:
 - WebSocket integration for faster data
-- Machine learning for opportunity prediction
-- Advanced risk models
-- More exchanges
-- Cross-exchange arbitrage
-- Improved execution algorithms
+- machine learning for opportunity prediction
+- advanced risk models
+- additional exchanges
+- cross-exchange arbitrage
+- improved execution algorithms
 
 ## Licence
 
-MIT Licence - see LICENCE file
+MIT Licence
 
 ## Acknowledgements
 
-- Built with [CCXT](https://github.com/ccxt/ccxt) for exchange integration
-- Uses [Rich](https://github.com/Textualize/rich) for beautiful terminal UI
-- Inspired by high-frequency trading research
-
-## Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Check existing documentation
-- Review examples.py for usage patterns
+- [CCXT](https://github.com/ccxt/ccxt) for exchange integration
+- [Rich](https://github.com/Textualize/rich) for terminal UI
 
 ---
 
-**Remember: Trade responsibly and never risk more than you can afford to lose!** 🔺
+🔺
