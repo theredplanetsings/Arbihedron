@@ -4,12 +4,10 @@ from typing import List, Tuple
 from datetime import datetime
 from enum import Enum
 
-
 class TradeDirection(Enum):
     """Trade direction enumeration."""
     BUY = "buy"
     SELL = "sell"
-
 
 @dataclass
 class TradingPair:
@@ -28,7 +26,6 @@ class TradingPair:
         """Calculate bid-ask spread percentage."""
         return ((self.ask - self.bid) / self.bid) * 100 if self.bid > 0 else 0
 
-
 @dataclass
 class TriangularPath:
     """Represents a triangular arbitrage path."""
@@ -45,7 +42,6 @@ class TriangularPath:
         path_str = " → ".join(self.path)
         return f"{path_str} | Profit: {self.profit_percentage:.4f}% (${self.profit_amount:.2f})"
 
-
 @dataclass
 class ArbitrageOpportunity:
     """Represents a detected arbitrage opportunity."""
@@ -60,7 +56,6 @@ class ArbitrageOpportunity:
         """Check if opportunity meets minimum profit threshold."""
         return self.path.profit_percentage >= min_threshold
 
-
 @dataclass
 class TradeExecution:
     """Represents an executed trade."""
@@ -71,7 +66,6 @@ class TradeExecution:
     success: bool
     trades: List[dict]
     error_message: str = ""
-
 
 @dataclass
 class MarketSnapshot:

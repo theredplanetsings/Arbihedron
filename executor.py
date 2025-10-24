@@ -10,17 +10,23 @@ from config import config, RiskConfig
 
 if TYPE_CHECKING:
     from exchange_client import ExchangeClient
-
+    from database import ArbihedronDatabase
 
 class TradeExecutor:
     """Executes triangular arbitrage trades."""
     
-    def __init__(self, exchange_client: 'ExchangeClient', config: RiskConfig):
+    def __init__(self, exchange_client: 'ExchangeClient', config: RiskConfig, database: 'ArbihedronDatabase' = None):
         """Initialise trade executor."""
         self.exchange = exchange_client
+        self.db = database
+        self.session_id = None
         self.execution_history = []
         self.trades_this_hour = 0
         self.last_reset = datetime.now()
+    
+    def set_session_id(self, session_id: int):
+        """Set the current session ID for database tracking."""
+        self.session_id = session_id
     
     async def execute_opportunity(
         self, opportunity: ArbitrageOpportunity
@@ -41,7 +47,7 @@ class TradeExecutor:
                 error_message="Rate limit exceeded"
             )
         
-        # double check the opportunity is still good
+        # double checks the opportunity is still good
         if not opportunity.executable:
             logger.warning(f"Opportunity no longer executable: {opportunity.reason}")
             return TradeExecution(
@@ -54,7 +60,7 @@ class TradeExecutor:
                 error_message=opportunity.reason
             )
         
-        # run through the trades one by one
+        # runs through the trades one by one
         trades_executed = []
         current_amount = opportunity.path.start_amount
         success = True
@@ -69,7 +75,7 @@ class TradeExecutor:
                     f"with {current_amount:.4f}"
                 )
                 
-                # work out how much to trade
+                # works out how much to trade
                 if direction == TradeDirection.BUY:
                     # buying base with quote currency
                     trade_amount = current_amount / pair.ask
@@ -79,12 +85,12 @@ class TradeExecutor:
                     trade_amount = current_amount
                     price = pair.bid
                 
-                # execute the order
+                # executes the order
                 order = await self.exchange.execute_order(
                     symbol=pair.symbol,
                     side=direction,
                     amount=trade_amount,
-                    price=None  # use market orders for speed
+                    price=None  # uses market orders for speed
                 )
                 
                 trades_executed.append({
@@ -97,7 +103,7 @@ class TradeExecutor:
                     'status': order.get('status')
                 })
                 
-                # figure out how much we have now for the next trade
+                # figures out how much we have now for the next trade
                 filled_amount = float(order.get('filled', trade_amount))
                 
                 if direction == TradeDirection.BUY:
@@ -107,13 +113,13 @@ class TradeExecutor:
                     avg_price = float(order.get('average', price))
                     current_amount = filled_amount * avg_price
                 
-                # take fees into account
+                # takes fees into account
                 fee_rate = self.exchange.get_trading_fee(pair.symbol)
                 current_amount *= (1 - fee_rate)
                 
                 logger.info(f"After step {i+1}: {current_amount:.4f}")
             
-            # see how much we actually made
+            # checks how much we actually made
             actual_profit = current_amount - opportunity.path.start_amount
             slippage = (
                 (actual_profit - opportunity.expected_profit) / 
@@ -132,7 +138,7 @@ class TradeExecutor:
             slippage = 0.0
             logger.error(f"Execution failed: {e}")
         
-        # Create execution record
+        # creates an execution record
         execution = TradeExecution(
             opportunity=opportunity,
             executed_at=execution_start,
@@ -146,13 +152,20 @@ class TradeExecutor:
         self.execution_history.append(execution)
         self.trades_this_hour += 1
         
+        # saves to database if available
+        if self.db and self.session_id:
+            try:
+                self.db.save_execution(self.session_id, execution)
+            except Exception as e:
+                logger.error(f"Failed to save execution to database: {e}")
+        
         return execution
     
     def _check_rate_limit(self) -> bool:
         """Check if we're within rate limits."""
         now = datetime.now()
         
-        # reset the counter every hour
+        # resets the counter every hour
         if (now - self.last_reset).total_seconds() > 3600:
             self.trades_this_hour = 0
             self.last_reset = now

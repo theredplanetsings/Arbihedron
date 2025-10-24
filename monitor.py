@@ -1,7 +1,7 @@
 """Real-time monitoring and display for arbitrage opportunities."""
 import asyncio
 from datetime import datetime
-from typing import List
+from typing import List, TYPE_CHECKING
 from rich.console import Console
 from rich.table import Table
 from rich.live import Live
@@ -10,16 +10,24 @@ from rich.layout import Layout
 from loguru import logger
 from models import ArbitrageOpportunity, MarketSnapshot
 
+if TYPE_CHECKING:
+    from database import ArbihedronDatabase
 
 class ArbitrageMonitor:
     """Monitors and displays arbitrage opportunities in real-time."""
     
-    def __init__(self):
+    def __init__(self, database: 'ArbihedronDatabase' = None):
         """Initialise monitor."""
         self.console = Console()
+        self.db = database
+        self.session_id = None
         self.latest_snapshot: MarketSnapshot = None
         self.total_opportunities_found = 0
         self.start_time = datetime.now()
+    
+    def set_session_id(self, session_id: int):
+        """Set the current session ID for database tracking."""
+        self.session_id = session_id
     
     def create_dashboard(self, snapshot: MarketSnapshot, stats: dict) -> Layout:
         """Create rich dashboard layout."""
@@ -48,7 +56,7 @@ class ArbitrageMonitor:
                 Panel("No opportunities detected...", title="Top Opportunities")
             )
         
-        # show execution stats
+        # shows the execution stats
         stats_table = self._create_stats_table(stats)
         layout["stats"].update(Panel(stats_table, title="Execution Statistics"))
         
@@ -117,6 +125,14 @@ class ArbitrageMonitor:
         self.latest_snapshot = snapshot
         if snapshot.opportunities:
             self.total_opportunities_found += len(snapshot.opportunities)
+            
+            # save opportunities to database
+            if self.db and self.session_id:
+                for opp in snapshot.opportunities:
+                    try:
+                        self.db.save_opportunity(self.session_id, opp)
+                    except Exception as e:
+                        logger.error(f"Failed to save opportunity to database: {e}")
     
     def log_opportunity(self, opportunity: ArbitrageOpportunity):
         """Print opportunity to console."""

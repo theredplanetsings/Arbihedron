@@ -1,0 +1,528 @@
+#!/bin/bash
+# Arbihedron Service Control Script
+# Usage: ./arbi {start|stop|restart|status|logs|install|uninstall}
+
+set -e
+
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SERVICE_NAME="com.arbihedron.bot"
+PLIST_FILE="$HOME/Library/LaunchAgents/$SERVICE_NAME.plist"
+PYTHON_SCRIPT="$SCRIPT_DIR/arbihedron_service.py"
+LOG_FILE="$SCRIPT_DIR/logs/service/current.log"
+PID_FILE="$SCRIPT_DIR/arbihedron.pid"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions
+print_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Find Python interpreter
+find_python() {
+    if command -v python3 &> /dev/null; then
+        echo "python3"
+    elif command -v python &> /dev/null; then
+        echo "python"
+    else
+        print_error "Python not found!"
+        exit 1
+    fi
+}
+
+PYTHON_CMD=$(find_python)
+
+# Check if service is running
+is_running() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null 2>&1; then
+            return 0
+        else
+            rm -f "$PID_FILE"
+            return 1
+        fi
+    fi
+    
+    # Also check launchctl
+    if launchctl list | grep -q "$SERVICE_NAME"; then
+        return 0
+    fi
+    
+    return 1
+}
+
+# Start service
+start_service() {
+    print_info "Starting Arbihedron service..."
+    
+    if is_running; then
+        print_warning "Service is already running"
+        return 0
+    fi
+    
+    # Check if installed as LaunchAgent
+    if [ -f "$PLIST_FILE" ]; then
+        print_info "Starting via launchctl..."
+        launchctl load "$PLIST_FILE" 2>/dev/null || true
+        launchctl start "$SERVICE_NAME" 2>/dev/null || true
+        sleep 2
+        
+        if is_running; then
+            print_success "Service started successfully"
+            print_info "View logs: ./arbi logs"
+            return 0
+        fi
+    fi
+    
+    # Fallback: run directly in background
+    print_info "Starting service directly..."
+    cd "$SCRIPT_DIR"
+    nohup $PYTHON_CMD "$PYTHON_SCRIPT" > "$LOG_FILE" 2>&1 &
+    echo $! > "$PID_FILE"
+    sleep 2
+    
+    if is_running; then
+        print_success "Service started successfully (PID: $(cat $PID_FILE))"
+        print_info "View logs: ./arbi logs"
+    else
+        print_error "Failed to start service"
+        rm -f "$PID_FILE"
+        return 1
+    fi
+}
+
+# Stop service
+stop_service() {
+    print_info "Stopping Arbihedron service..."
+    
+    if ! is_running; then
+        print_warning "Service is not running"
+        return 0
+    fi
+    
+    # Try launchctl first
+    if launchctl list | grep -q "$SERVICE_NAME"; then
+        print_info "Stopping via launchctl..."
+        launchctl stop "$SERVICE_NAME" 2>/dev/null || true
+        sleep 2
+    fi
+    
+    # Try PID file
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        print_info "Sending SIGTERM to process $PID..."
+        kill -TERM "$PID" 2>/dev/null || true
+        
+        # Wait for graceful shutdown
+        for i in {1..10}; do
+            if ! ps -p "$PID" > /dev/null 2>&1; then
+                break
+            fi
+            sleep 1
+        done
+        
+        # Force kill if still running
+        if ps -p "$PID" > /dev/null 2>&1; then
+            print_warning "Process didn't stop gracefully, force killing..."
+            kill -9 "$PID" 2>/dev/null || true
+        fi
+        
+        rm -f "$PID_FILE"
+    fi
+    
+    print_success "Service stopped"
+}
+
+# Restart service
+restart_service() {
+    print_info "Restarting Arbihedron service..."
+    stop_service
+    sleep 2
+    start_service
+}
+
+# Show status
+show_status() {
+    print_info "Arbihedron Service Status"
+    echo "================================"
+    
+    if is_running; then
+        echo -e "Status: ${GREEN}RUNNING${NC}"
+        if [ -f "$PID_FILE" ]; then
+            PID=$(cat "$PID_FILE")
+            echo "PID: $PID"
+            
+            # Show process info
+            if ps -p "$PID" > /dev/null 2>&1; then
+                echo "Memory: $(ps -o rss= -p "$PID" | awk '{printf "%.1f MB", $1/1024}')"
+                echo "CPU: $(ps -o %cpu= -p "$PID")%"
+                echo "Uptime: $(ps -o etime= -p "$PID" | xargs)"
+            fi
+        fi
+        
+        # Check if installed
+        if [ -f "$PLIST_FILE" ]; then
+            echo -e "LaunchAgent: ${GREEN}INSTALLED${NC}"
+        else
+            echo -e "LaunchAgent: ${YELLOW}NOT INSTALLED${NC}"
+        fi
+    else
+        echo -e "Status: ${RED}STOPPED${NC}"
+    fi
+    
+    echo ""
+    echo "Recent activity:"
+    if [ -f "$LOG_FILE" ]; then
+        tail -n 5 "$LOG_FILE" 2>/dev/null || echo "No logs available"
+    else
+        echo "No logs available"
+    fi
+}
+
+# Show logs
+show_logs() {
+    if [ "$1" == "-f" ] || [ "$1" == "--follow" ]; then
+        print_info "Following logs (Ctrl+C to stop)..."
+        tail -f "$SCRIPT_DIR"/logs/service/*.log 2>/dev/null || print_error "No log files found"
+    else
+        print_info "Recent logs (use -f to follow):"
+        tail -n 50 "$SCRIPT_DIR"/logs/service/*.log 2>/dev/null || print_error "No log files found"
+    fi
+}
+
+# Install as LaunchAgent
+install_service() {
+    print_info "Installing Arbihedron as LaunchAgent..."
+    
+    # Create LaunchAgents directory if it doesn't exist
+    mkdir -p "$HOME/Library/LaunchAgents"
+    
+    # Get Python path
+    PYTHON_PATH=$(which $PYTHON_CMD)
+    
+    # Create plist file
+    cat > "$PLIST_FILE" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$SERVICE_NAME</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>$PYTHON_PATH</string>
+        <string>$PYTHON_SCRIPT</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>$SCRIPT_DIR</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+    
+    <key>StandardOutPath</key>
+    <string>$SCRIPT_DIR/logs/service/stdout.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>$SCRIPT_DIR/logs/service/stderr.log</string>
+    
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+    
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
+EOF
+    
+    print_success "LaunchAgent plist created at: $PLIST_FILE"
+    print_info "Loading LaunchAgent..."
+    
+    launchctl load "$PLIST_FILE" 2>/dev/null || true
+    
+    print_success "Installation complete!"
+    print_info "The service will now:"
+    print_info "  - Start automatically on boot"
+    print_info "  - Restart automatically on crash"
+    print_info "  - Run in the background"
+    print_info ""
+    print_info "Start the service: ./arbi start"
+}
+
+# Uninstall LaunchAgent
+uninstall_service() {
+    print_info "Uninstalling Arbihedron LaunchAgent..."
+    
+    # Stop if running
+    if is_running; then
+        stop_service
+    fi
+    
+    # Unload and remove plist
+    if [ -f "$PLIST_FILE" ]; then
+        launchctl unload "$PLIST_FILE" 2>/dev/null || true
+        rm -f "$PLIST_FILE"
+        print_success "LaunchAgent removed"
+    else
+        print_warning "LaunchAgent not installed"
+    fi
+    
+    print_success "Uninstall complete"
+}
+
+# Generate reports
+generate_reports() {
+    print_info "Generating analytics reports..."
+    
+    if [ ! -f "$SCRIPT_DIR/generate_report.py" ]; then
+        print_error "generate_report.py not found"
+        return 1
+    fi
+    
+    case "${1:-all}" in
+        md|markdown)
+            $PYTHON_CMD "$SCRIPT_DIR/generate_report.py" markdown
+            ;;
+        html)
+            $PYTHON_CMD "$SCRIPT_DIR/generate_report.py" html
+            ;;
+        resume)
+            $PYTHON_CMD "$SCRIPT_DIR/generate_report.py" resume
+            ;;
+        json)
+            $PYTHON_CMD "$SCRIPT_DIR/generate_report.py" json
+            ;;
+        all)
+            $PYTHON_CMD "$SCRIPT_DIR/generate_report.py" all
+            ;;
+        *)
+            print_error "Unknown report type: $1"
+            print_info "Available types: md, html, resume, json, all"
+            return 1
+            ;;
+    esac
+}
+
+# Test alerts
+test_alerts() {
+    print_info "Testing alert notifications..."
+    
+    if [ ! -f "$SCRIPT_DIR/test_alerts.py" ]; then
+        print_error "test_alerts.py not found"
+        return 1
+    fi
+    
+    $PYTHON_CMD "$SCRIPT_DIR/test_alerts.py"
+}
+
+# Configure alerts interactively
+configure_alerts() {
+    print_info "Alert Configuration Helper"
+    echo ""
+    
+    ENV_FILE="$SCRIPT_DIR/.env"
+    
+    # Check if .env exists
+    if [ ! -f "$ENV_FILE" ]; then
+        print_info "Creating new .env file..."
+        touch "$ENV_FILE"
+    fi
+    
+    echo "This will help you configure email and Slack alerts."
+    echo "Press Enter to skip any field (keeps existing value)."
+    echo ""
+    
+    # Email configuration
+    echo -e "${BLUE}=== Email Configuration ===${NC}"
+    read -p "Enable email alerts? (true/false) [false]: " EMAIL_ENABLED
+    if [ ! -z "$EMAIL_ENABLED" ]; then
+        sed -i '' '/^EMAIL_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "EMAIL_ENABLED=$EMAIL_ENABLED" >> "$ENV_FILE"
+    fi
+    
+    read -p "SMTP Host [smtp.gmail.com]: " SMTP_HOST
+    if [ ! -z "$SMTP_HOST" ]; then
+        sed -i '' '/^SMTP_HOST=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SMTP_HOST=$SMTP_HOST" >> "$ENV_FILE"
+    fi
+    
+    read -p "SMTP Port [587]: " SMTP_PORT
+    if [ ! -z "$SMTP_PORT" ]; then
+        sed -i '' '/^SMTP_PORT=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SMTP_PORT=$SMTP_PORT" >> "$ENV_FILE"
+    fi
+    
+    read -p "SMTP Username: " SMTP_USER
+    if [ ! -z "$SMTP_USER" ]; then
+        sed -i '' '/^SMTP_USER=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SMTP_USER=$SMTP_USER" >> "$ENV_FILE"
+    fi
+    
+    read -s -p "SMTP Password: " SMTP_PASSWORD
+    echo ""
+    if [ ! -z "$SMTP_PASSWORD" ]; then
+        sed -i '' '/^SMTP_PASSWORD=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SMTP_PASSWORD=$SMTP_PASSWORD" >> "$ENV_FILE"
+    fi
+    
+    read -p "Email Recipients (comma-separated): " EMAIL_RECIPIENTS
+    if [ ! -z "$EMAIL_RECIPIENTS" ]; then
+        sed -i '' '/^EMAIL_RECIPIENTS=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "EMAIL_RECIPIENTS=$EMAIL_RECIPIENTS" >> "$ENV_FILE"
+    fi
+    
+    echo ""
+    echo -e "${BLUE}=== Slack Configuration ===${NC}"
+    read -p "Enable Slack alerts? (true/false) [false]: " SLACK_ENABLED
+    if [ ! -z "$SLACK_ENABLED" ]; then
+        sed -i '' '/^SLACK_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SLACK_ENABLED=$SLACK_ENABLED" >> "$ENV_FILE"
+    fi
+    
+    read -p "Slack Webhook URL: " SLACK_WEBHOOK
+    if [ ! -z "$SLACK_WEBHOOK" ]; then
+        sed -i '' '/^SLACK_WEBHOOK_URL=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK" >> "$ENV_FILE"
+    fi
+    
+    echo ""
+    echo -e "${BLUE}=== Alert Preferences ===${NC}"
+    read -p "Min profit threshold for opportunity alerts [0.5]: " ALERT_MIN_PROFIT
+    if [ ! -z "$ALERT_MIN_PROFIT" ]; then
+        sed -i '' '/^ALERT_MIN_PROFIT=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "ALERT_MIN_PROFIT=$ALERT_MIN_PROFIT" >> "$ENV_FILE"
+    fi
+    
+    read -p "Max alerts per hour [10]: " MAX_ALERTS_PER_HOUR
+    if [ ! -z "$MAX_ALERTS_PER_HOUR" ]; then
+        sed -i '' '/^MAX_ALERTS_PER_HOUR=/d' "$ENV_FILE" 2>/dev/null || true
+        echo "MAX_ALERTS_PER_HOUR=$MAX_ALERTS_PER_HOUR" >> "$ENV_FILE"
+    fi
+    
+    echo ""
+    print_success "Alert configuration saved to .env"
+    print_info "Run './arbi test-alerts' to verify your settings"
+}
+
+# Check health status
+check_health() {
+    if ! is_running; then
+        print_warning "Service is not running"
+        return 1
+    fi
+    
+    # Get health port from config (default 8080)
+    HEALTH_PORT=${HEALTH_PORT:-8080}
+    
+    print_info "Checking health status on port $HEALTH_PORT..."
+    
+    # Try to fetch health status
+    if command -v curl &> /dev/null; then
+        echo ""
+        echo -e "${BLUE}=== Health Check ===${NC}"
+        curl -s "http://localhost:$HEALTH_PORT/health" || print_error "Health check failed"
+        
+        echo ""
+        echo -e "${BLUE}=== Metrics ===${NC}"
+        curl -s "http://localhost:$HEALTH_PORT/metrics" | python3 -m json.tool 2>/dev/null || print_error "Failed to fetch metrics"
+        
+        echo ""
+        print_info "View full status page: http://localhost:$HEALTH_PORT/status"
+    else
+        print_error "curl not found. Install curl to use health checks."
+        print_info "Or visit: http://localhost:$HEALTH_PORT/status in your browser"
+    fi
+}
+
+# Main command handler
+case "${1:-}" in
+    start)
+        start_service
+        ;;
+    stop)
+        stop_service
+        ;;
+    restart)
+        restart_service
+        ;;
+    status)
+        show_status
+        ;;
+    logs)
+        show_logs "${2:-}"
+        ;;
+    install)
+        install_service
+        ;;
+    uninstall)
+        uninstall_service
+        ;;
+    report)
+        generate_reports "${2:-all}"
+        ;;
+    test-alerts)
+        test_alerts
+        ;;
+    config-alerts)
+        configure_alerts
+        ;;
+    health)
+        check_health
+        ;;
+    *)
+        echo "Arbihedron Service Control"
+        echo ""
+        echo "Usage: ./arbi {start|stop|restart|status|logs|install|uninstall|report|test-alerts|config-alerts|health}"
+        echo ""
+        echo "Commands:"
+        echo "  start            - Start the service"
+        echo "  stop             - Stop the service"
+        echo "  restart          - Restart the service"
+        echo "  status           - Show service status"
+        echo "  logs             - Show recent logs (add -f to follow)"
+        echo "  install          - Install as LaunchAgent (auto-start on boot)"
+        echo "  uninstall        - Remove LaunchAgent"
+        echo "  report [type]    - Generate analytics report (md|html|resume|json|all)"
+        echo "  test-alerts      - Test email/Slack notifications"
+        echo "  config-alerts    - Configure alert settings interactively"
+        echo "  health           - Show health status (if service is running)"
+        echo ""
+        echo "Examples:"
+        echo "  ./arbi start          # Start the bot"
+        echo "  ./arbi status         # Check if running"
+        echo "  ./arbi logs -f        # Follow logs in real-time"
+        echo "  ./arbi report html    # Generate HTML report"
+        echo "  ./arbi report all     # Generate all reports"
+        echo "  ./arbi test-alerts    # Test notification system"
+        echo "  ./arbi health         # View health metrics"
+        exit 1
+        ;;
+esac

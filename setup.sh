@@ -1,33 +1,32 @@
 #!/bin/bash
-# Setup script for Arbihedron
-
+# Setup script
 echo "Setting up Arbihedron..."
 
-# Check Python version
+# checks py version
 python_version=$(python3 --version 2>&1 | awk '{print $2}')
 echo "Python version: $python_version"
 
-# Create virtual environment
+# creates the virtual environment
 echo "Creating virtual environment..."
 python3 -m venv venv
 
-# Activate virtual environment
+# activates the virtual environment
 echo "Activating virtual environment..."
 source venv/bin/activate
 
-# Upgrade pip
+# upgrades pip
 echo "Upgrading pip..."
 pip install --upgrade pip
 
-# Install dependencies
+# installs dependencies
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
-# Create logs directory
+# creates logs directory
 echo "Creating logs directory..."
 mkdir -p logs
 
-# Copy environment file if it doesn't exist
+# copies environment file if it doesn't exist
 if [ ! -f .env ]; then
     echo "Creating .env file from template..."
     cp .env.example .env
@@ -36,7 +35,7 @@ else
     echo ".env file already exists"
 fi
 
-# Make scripts executable
+# makes scripts executable
 echo "Making scripts executable..."
 chmod +x main.py
 chmod +x examples.py

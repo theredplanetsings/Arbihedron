@@ -26,7 +26,7 @@ class ArbitrageBacktest:
         initial_capital: float = 10000.0
     ) -> Dict:
         """Run backtest on historical data."""
-        # set up components if we haven't already
+        # sets up components if we haven't already
         if self.engine is None:
             from exchange_client import ExchangeClient
             from arbitrage_engine import ArbitrageEngine
@@ -43,14 +43,14 @@ class ArbitrageBacktest:
         num_simulations = 100
         
         for i in range(num_simulations):
-            # look for opportunities in the market
+            # looks for opportunities in the market
             snapshot = await self.engine.scan_opportunities()
             
             if snapshot.opportunities:
-                # pretend we execute the best one
+                # pretends that we execute the best one
                 best_opp = snapshot.opportunities[0]
                 
-                # account for slippage in the simulation
+                # accounts for slippage in the simulation
                 simulated_slippage = 0.1  # assume 0.1% slippage
                 actual_profit = best_opp.expected_profit * (1 - simulated_slippage / 100)
                 
@@ -66,10 +66,10 @@ class ArbitrageBacktest:
                 
                 logger.info(f"Sim {i+1}: Profit ${actual_profit:.2f} | Capital: ${capital:.2f}")
             
-            # pause between scans
+            # pauses between scans
             await asyncio.sleep(0.5)
         
-        # crunch the numbers
+        # crunches the numbers
         results = self._calculate_results(initial_capital, capital)
         self._display_results(results)
         
@@ -123,7 +123,6 @@ class ArbitrageBacktest:
         
         self.console.print(table)
 
-
 async def main():
     """Run backtest."""
     from exchange_client import ExchangeClient
@@ -147,7 +146,6 @@ async def main():
     finally:
         if backtester.exchange:
             backtester.exchange.close()
-
 
 if __name__ == "__main__":
     try:

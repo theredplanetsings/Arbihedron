@@ -5,12 +5,11 @@ from exchange_client import ExchangeClient
 from arbitrage_engine import ArbitrageEngine
 from config import config
 
-
 async def simple_scan_example():
     """Simple example: scan for opportunities."""
     print("🔺 Arbihedron - Scan Example\n")
     
-    # set everything up
+    # sets everything up
     exchange = ExchangeClient(config.exchange)
     engine = ArbitrageEngine(exchange, config.trading)
     
@@ -20,12 +19,12 @@ async def simple_scan_example():
     print(f"Discovered {len(engine.triangular_paths)} triangular paths")
     print(f"Scanning for opportunities...\n")
     
-    # do a quick scan
+    # does a quick scan
     snapshot = await engine.scan_opportunities()
     
     print(f"Found {len(snapshot.opportunities)} opportunities\n")
     
-    # show the best ones
+    # shows the best ones
     for i, opp in enumerate(snapshot.opportunities[:5], 1):
         path_str = " → ".join(opp.path.path)
         print(f"{i}. {path_str}")
@@ -34,7 +33,7 @@ async def simple_scan_example():
         print(f"   Executable: {'Yes' if opp.executable else 'No'}")
         print()
     
-    # clean up
+    # cleans up
     exchange.close()
     print("Done!")
 
@@ -65,7 +64,7 @@ async def continuous_monitoring_example():
             else:
                 print(f"Scan #{scan_count} | No opportunities found")
             
-            await asyncio.sleep(5)  # check every 5 seconds
+            await asyncio.sleep(5)  # checks every 5 seconds
             
     except KeyboardInterrupt:
         print("\nStopping...")
@@ -75,7 +74,7 @@ async def continuous_monitoring_example():
 
 if __name__ == "__main__":
     try:
-        # run a quick scan
+        # runs a quick scan
         asyncio.run(simple_scan_example())
         
         # uncomment this to keep scanning continuously

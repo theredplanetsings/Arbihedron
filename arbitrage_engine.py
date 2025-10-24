@@ -10,12 +10,11 @@ from models import (
 )
 from config import config, TradingConfig
 
-# import after models to avoid circular dependency issues
+# imports after models to avoid circular dependency issues
 if TYPE_CHECKING:
     from exchange_client import ExchangeClient
 else:
     ExchangeClient = None
-
 
 class ArbitrageEngine:
     """Detects and analyses triangular arbitrage opportunities."""
@@ -39,7 +38,7 @@ class ArbitrageEngine:
     
     def _discover_triangular_paths(self):
         """Discover all possible triangular arbitrage paths."""
-        # get all available trading pairs
+        # gets all available trading pairs
         available_pairs = set()
         currency_graph: Dict[str, Set[str]] = {}
         
@@ -48,7 +47,7 @@ class ArbitrageEngine:
                 base, quote = symbol.split('/')
                 available_pairs.add((base, quote))
                 
-                # build a graph of which currencies connect to each other
+                # builds a graph of which currencies connect to each other
                 if base not in currency_graph:
                     currency_graph[base] = set()
                 if quote not in currency_graph:
@@ -60,24 +59,24 @@ class ArbitrageEngine:
             except ValueError:
                 continue
         
-        # find triangular paths starting from each base currency
+        # finds the triangular paths starting from each base currency
         paths = set()
         
         for start_currency in self.base_currencies:
             if start_currency not in currency_graph:
                 continue
             
-            # find all currencies we can reach from start
+            # finds all currencies we can reach from start
             for mid_currency in currency_graph[start_currency]:
                 if mid_currency == start_currency:
                     continue
                 
-                # find currencies that can complete the triangle back to start
+                # finds currencies that can complete the triangle back to start
                 for end_currency in currency_graph.get(mid_currency, set()):
                     if end_currency == start_currency or end_currency == mid_currency:
                         continue
                     
-                    # check if we can get back to where we started
+                    # checks if we can get back to where we started
                     if start_currency in currency_graph.get(end_currency, set()):
                         path = (start_currency, mid_currency, end_currency, start_currency)
                         paths.add(path)
@@ -89,7 +88,7 @@ class ArbitrageEngine:
         self, from_currency: str, to_currency: str
     ) -> Tuple[str, TradeDirection]:
         """Determine trading pair symbol and direction."""
-        # try the direct pair first
+        # tries the direct pair first
         symbol_direct = f"{from_currency}/{to_currency}"
         symbol_inverse = f"{to_currency}/{from_currency}"
         
@@ -109,7 +108,7 @@ class ArbitrageEngine:
         directions_used = []
         total_fees = 0.0
         
-        # simulate trades along the path
+        # simulates trades along the path
         for i in range(len(path) - 1):
             from_curr = path[i]
             to_curr = path[i + 1]
@@ -117,14 +116,14 @@ class ArbitrageEngine:
             symbol, direction = self._get_symbol_and_direction(from_curr, to_curr)
             
             if not symbol or symbol not in self.trading_pairs_map:
-                # path isn't available right now
+                # if isn't available right now
                 return None
             
             pair = self.trading_pairs_map[symbol]
             pairs_used.append(pair)
             directions_used.append(direction)
             
-            # work out the trade details
+            # works out the trade details
             fee_rate = self.exchange.get_trading_fee(symbol)
             
             if direction == TradeDirection.BUY:
@@ -146,7 +145,7 @@ class ArbitrageEngine:
             
             total_fees += fee * price if direction == TradeDirection.SELL else fee
         
-        # work out how much we made (or lost)
+        # works out how much we made (or lost)
         profit_amount = amount - start_amount
         profit_percentage = (profit_amount / start_amount) * 100
         
@@ -164,7 +163,7 @@ class ArbitrageEngine:
         """Scan for arbitrage opportunities across all triangular paths."""
         timestamp = datetime.now()
         
-        # figure out which symbols we need to check
+        # figures out which symbols we need to check
         symbols_needed = set()
         for path in self.triangular_paths:
             for i in range(len(path) - 1):
@@ -173,14 +172,14 @@ class ArbitrageEngine:
                 symbols_needed.add(f"{from_curr}/{to_curr}")
                 symbols_needed.add(f"{to_curr}/{from_curr}")
         
-        # grab all the current prices
+        # grabs all the current prices
         symbols_list = [s for s in symbols_needed if s in self.exchange.markets]
         trading_pairs = await self.exchange.fetch_tickers_batch(symbols_list)
         
-        # update our map with fresh data
+        # updates our map with fresh data
         self.trading_pairs_map = {pair.symbol: pair for pair in trading_pairs}
         
-        # check each path for profitable opportunities
+        # checks each path for profitable opportunities
         opportunities = []
         
         for path in self.triangular_paths:
@@ -190,10 +189,10 @@ class ArbitrageEngine:
             )
             
             if triangular_path and triangular_path.profit_percentage > 0:
-                # figure out how risky this looks
+                # figures out how risky this looks
                 risk_score = self._calculate_risk_score(triangular_path)
                 
-                # check if it's worth executing
+                # checks if it's worth executing
                 executable = triangular_path.profit_percentage >= config.trading.min_profit_threshold
                 
                 opportunity = ArbitrageOpportunity(
@@ -208,7 +207,7 @@ class ArbitrageEngine:
                 if executable:
                     opportunities.append(opportunity)
         
-        # sort by best profit first
+        # sorts by best profit first
         opportunities.sort(key=lambda x: x.path.profit_percentage, reverse=True)
         
         logger.info(f"Found {len(opportunities)} executable opportunities")

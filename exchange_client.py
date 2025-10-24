@@ -7,7 +7,6 @@ from loguru import logger
 from models import TradingPair, TradeDirection
 from config import config, ExchangeConfig
 
-
 class ExchangeClient:
     """Handles all exchange interactions."""
     
@@ -31,7 +30,7 @@ class ExchangeClient:
                 }
             })
             
-            # enable sandbox/testnet if the exchange supports it
+            # enables sandbox/testnet if the exchange supports it
             if self.config.testnet:
                 try:
                     self.exchange.set_sandbox_mode(True)
@@ -84,7 +83,7 @@ class ExchangeClient:
         tasks = [self.fetch_ticker(symbol) for symbol in symbols]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # filter out failures and get just the good ones
+        # filters out the failures and get just the good ones
         valid_pairs = [r for r in results if isinstance(r, TradingPair)]
         logger.debug(f"Fetched {len(valid_pairs)}/{len(symbols)} tickers")
         

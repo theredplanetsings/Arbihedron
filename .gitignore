@@ -48,5 +48,19 @@ Thumbs.db
 # Trading data
 backtest_results/
 trade_history/
+
+# Database and exports (don't commit trading data)
+data/
+exports/
+*.db
+*.sqlite
+*.sqlite3
+
+# Test outputs
+test_*.db
+
+# Service files
+*.pid
+arbihedron.pid
 *.csv
 *.db
