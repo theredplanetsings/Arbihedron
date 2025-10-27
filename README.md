@@ -1,4 +1,4 @@
-# Arbihedron
+# 🔺 Arbihedron
 
 High-frequency triangular arbitrage system for cryptocurrency markets. Detects and exploits price discrepancies through circular trading paths (A to B to C to A) within single exchanges.
 
