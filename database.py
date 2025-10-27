@@ -107,6 +107,10 @@ class ArbihedronDatabase:
     
     def end_session(self, session_id: int):
         """Mark a session as completed."""
+        if not self.conn:
+            logger.debug("Cannot end session: database connection is closed")
+            return
+            
         cursor = self.conn.cursor()
         cursor.execute("""
             UPDATE sessions 

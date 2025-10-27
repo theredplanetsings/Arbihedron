@@ -246,7 +246,10 @@ class ArbihedronBot:
         
         # ends the database session
         if self.session_id:
-            self.db.end_session(self.session_id)
+            try:
+                self.db.end_session(self.session_id)
+            except Exception as e:
+                logger.debug(f"Could not end session (database may already be closed): {e}")
         
         # shows the final stats
         stats = self.executor.get_statistics()
@@ -268,7 +271,10 @@ class ArbihedronBot:
             logger.error(f"Failed to export data: {e}")
         
         # closes database
-        self.db.close()
+        try:
+            self.db.close()
+        except Exception as e:
+            logger.debug(f"Database already closed: {e}")
         
         logger.success("Shutdown complete")
 
