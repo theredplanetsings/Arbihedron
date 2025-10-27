@@ -9,7 +9,6 @@ from rich.panel import Panel
 from rich.layout import Layout
 from loguru import logger
 from models import ArbitrageOpportunity, MarketSnapshot
-
 if TYPE_CHECKING:
     from database import ArbihedronDatabase
 
@@ -41,12 +40,12 @@ class ArbitrageMonitor:
         # show basic info at the top
         runtime = datetime.now() - self.start_time
         header_text = (
-            f"🔺 ARBIHEDRON - Triangular Arbitrage Monitor\n"
+            f"🔺 Arbihedron - Triangular Arbitrage Monitor\n"
             f"Runtime: {runtime} | "
             f"Opportunities Found: {self.total_opportunities_found}"
         )
         layout["header"].update(Panel(header_text, style="bold cyan"))
-        
+
         # list the best opportunities we've found
         if snapshot and snapshot.opportunities:
             opps_table = self._create_opportunities_table(snapshot.opportunities[:10])
@@ -61,13 +60,13 @@ class ArbitrageMonitor:
         layout["stats"].update(Panel(stats_table, title="Execution Statistics"))
         
         return layout
-    
+
     def _create_opportunities_table(
         self, opportunities: List[ArbitrageOpportunity]
     ) -> Table:
         """Create table of opportunities."""
         table = Table(show_header=True, header_style="bold magenta")
-        
+
         table.add_column("Path", style="cyan", width=25)
         table.add_column("Profit %", justify="right", style="green")
         table.add_column("Profit $", justify="right", style="green")
