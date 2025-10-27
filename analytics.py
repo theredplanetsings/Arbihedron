@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 import json
 from database import ArbihedronDatabase
-
-
 class ArbihedronAnalytics:
     """Generate analytics and reports from trading data."""
     
@@ -18,7 +16,7 @@ class ArbihedronAnalytics:
         """Get overall statistics across all sessions."""
         cursor = self.db.conn.cursor()
         
-        # Session stats
+        # our session stats
         cursor.execute("""
             SELECT 
                 COUNT(*) as total_sessions,
@@ -31,7 +29,7 @@ class ArbihedronAnalytics:
         """)
         session_stats = dict(cursor.fetchone())
         
-        # Execution stats
+        # our execution stats
         cursor.execute("""
             SELECT 
                 COUNT(*) as total_executions,
@@ -45,14 +43,14 @@ class ArbihedronAnalytics:
         """)
         exec_stats = dict(cursor.fetchone())
         
-        # Calculate success rate
+        # calculates the success rate
         if exec_stats['total_executions']:
             success_rate = (exec_stats['successful_executions'] / 
                           exec_stats['total_executions'] * 100)
         else:
             success_rate = 0
         
-        # Calculate runtime
+        # calculates the runtime
         if session_stats['first_session'] and session_stats['last_session']:
             first = datetime.fromisoformat(session_stats['first_session'])
             last = datetime.fromisoformat(session_stats['last_session'])
@@ -204,7 +202,7 @@ class ArbihedronAnalytics:
         """Calculate key performance metrics."""
         overall = self.get_overall_stats()
         
-        # Calculate additional metrics
+        # calculates the additional metrics
         if overall['total_opportunities'] > 0:
             executable_rate = (overall['total_executions'] / 
                              overall['total_opportunities'] * 100)
@@ -237,7 +235,7 @@ class ArbihedronAnalytics:
         daily_stats = self.get_daily_stats()
         hourly_dist = self.get_hourly_distribution()
         
-        # Format for charts
+        # format for charts
         chart_data = {
             'daily_profit': {
                 'labels': [d['date'] for d in daily_stats],
