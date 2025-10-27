@@ -48,12 +48,10 @@ If the compound exchange rate after fees exceeds 1.0, profit opportunity exists.
 git clone https://github.com/theredplanetsings/Arbihedron.git
 cd Arbihedron
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Run setup script
+./setup.sh              # Basic installation
+./setup.sh --gnn        # Include GNN dependencies
+./setup.sh --full       # Complete installation with all features
 ```
 
 ### Configuration
@@ -147,8 +145,19 @@ Arbihedron/
 ├── arbi                       # Service control script
 ├── utils.py                   # Utility functions
 ├── examples.py                # Usage examples
+├── view_data.py               # Data visualization
 ├── requirements.txt           # Dependencies
-├── GNN_ARCHITECTURE.md        # GNN implementation details
+├── setup.sh                   # Setup script
+├── docs/                      # Documentation
+│   ├── ARCHITECTURE.md        # System architecture
+│   ├── EXCHANGES.md           # Exchange details
+│   ├── GNN_ARCHITECTURE.md    # GNN implementation
+│   └── logs.md                # Logging guide
+├── tests/                     # Test suite
+│   ├── test.py
+│   ├── test_alerts.py
+│   ├── test_database.py
+│   └── test_gnn.py
 └── models/                    # Trained GNN models
 ```
 
@@ -354,7 +363,7 @@ This software is for educational purposes only. Cryptocurrency trading carries s
 
 ### Graph Neural Network (GNN) Engine
 
-The GNN engine uses Graph Attention Networks (GAT) to learn arbitrage opportunity detection from real market data. See [GNN_ARCHITECTURE.md](GNN_ARCHITECTURE.md) for detailed documentation.
+The GNN engine uses Graph Attention Networks (GAT) to learn arbitrage opportunity detection from real market data. See [docs/GNN_ARCHITECTURE.md](docs/GNN_ARCHITECTURE.md) for detailed documentation.
 
 **Architecture:**
 - 3 GAT layers with 128 hidden dimensions
@@ -396,9 +405,13 @@ Simulates trading on historical market data.
 ### Testing
 
 ```bash
-python test.py            # Test core components
-python test_database.py   # Test persistence
-python test_alerts.py     # Test notifications
+# Run all tests
+cd tests
+python -m pytest
+
+# Run specific test
+python test_database.py
+python test_gnn.py
 ```
 
 ## Contributing
