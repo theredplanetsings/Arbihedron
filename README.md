@@ -7,7 +7,9 @@ Paper trading mode enabled by default.
 ## Features
 
 - Real-time market monitoring across multiple exchanges
-- Triangular arbitrage opportunity detection
+- Triangular arbitrage opportunity detection with dual engines:
+  - **Traditional engine**: Graph-based path detection with real-time validation
+  - **GNN engine** (experimental): Graph Neural Network for learned opportunity detection
 - Risk management with configurable thresholds
 - Paper trading mode (default)
 - Performance analytics and backtesting
@@ -70,7 +72,7 @@ API_SECRET=your_api_secret_here
 
 # Trading parameters
 MIN_PROFIT_THRESHOLD=0.5    # Minimum 0.5% profit
-MAX_POSITION_SIZE=1000      # £1000 per trade
+MAX_POSITION_SIZE=1000      # $1000 per trade
 SLIPPAGE_TOLERANCE=0.1      # 0.1% slippage
 
 # Safety first
@@ -126,28 +128,33 @@ Only enable after thorough testing:
 
 ```
 Arbihedron/
-├── main.py                 # Main orchestrator
-├── config.py              # Configuration management
-├── models.py              # Data models
-├── exchange_client.py     # Exchange API integration
-├── arbitrage_engine.py    # Core arbitrage detection
-├── executor.py            # Trade execution engine
-├── monitor.py             # Real-time monitoring & UI
-├── backtest.py            # Backtesting framework
-├── database.py            # SQLite persistence layer
-├── analytics.py           # Performance analytics
-├── alerts.py              # Email/Slack notifications
-├── health_monitor.py      # HTTP health endpoints
-├── arbihedron_service.py  # Service wrapper with auto-restart
-├── arbi                   # Service control script
-├── utils.py               # Utility functions
-├── examples.py            # Usage examples
-└── requirements.txt       # Dependencies
+├── main.py                    # Main orchestrator
+├── config.py                  # Configuration management
+├── models.py                  # Data models
+├── exchange_client.py         # Exchange API integration
+├── arbitrage_engine.py        # Traditional arbitrage detection
+├── gnn_arbitrage_engine.py    # GNN-based detection (experimental)
+├── train_gnn_real.py          # GNN training on real market data
+├── compare_engines.py         # Traditional vs GNN comparison
+├── executor.py                # Trade execution engine
+├── monitor.py                 # Real-time monitoring & UI
+├── backtest.py                # Backtesting framework
+├── database.py                # SQLite persistence layer
+├── analytics.py               # Performance analytics
+├── alerts.py                  # Email/Slack notifications
+├── health_monitor.py          # HTTP health endpoints
+├── arbihedron_service.py      # Service wrapper with auto-restart
+├── arbi                       # Service control script
+├── utils.py                   # Utility functions
+├── examples.py                # Usage examples
+├── requirements.txt           # Dependencies
+├── GNN_ARCHITECTURE.md        # GNN implementation details
+└── models/                    # Trained GNN models
 ```
 
 ## Usage Examples
 
-### Basic Opportunity Scan
+### Basic Opportunity Scan (Traditional Engine)
 
 ```python
 import asyncio
@@ -167,6 +174,52 @@ async def scan():
     exchange.close()
 
 asyncio.run(scan())
+```
+
+### GNN Engine (Experimental)
+
+```python
+import asyncio
+from exchange_client import ExchangeClient
+from gnn_arbitrage_engine import GNNArbitrageEngine
+
+async def scan_with_gnn():
+    exchange = ExchangeClient()
+    engine = GNNArbitrageEngine(exchange, model_path='models/gnn_arbitrage_best.pth')
+    await engine.initialize()
+    
+    snapshot = await engine.scan_opportunities()
+    
+    for opp in snapshot.opportunities[:5]:
+        print(f"{opp.path} - Predicted Profit: {opp.path.profit_percentage:.4f}%")
+    
+    exchange.close()
+
+asyncio.run(scan_with_gnn())
+```
+
+### Train GNN on Real Market Data
+
+```python
+import asyncio
+from train_gnn_real import GNNTrainer
+
+async def train():
+    trainer = GNNTrainer()
+    
+    # Collect training data from live markets
+    await trainer.collect_training_data(num_scans=100, wait_between_scans=30)
+    
+    # Train the model
+    trainer.train(epochs=50, patience=5)
+
+asyncio.run(train())
+```
+
+### Compare Traditional vs GNN Engines
+
+```bash
+python compare_engines.py --num-scans 20
 ```
 
 ### Full Bot with Dashboard
@@ -189,7 +242,7 @@ asyncio.run(run())
 |-----------|-------------|---------|
 | `EXCHANGE_NAME` | Exchange to use | kraken |
 | `MIN_PROFIT_THRESHOLD` | Minimum profit % | 0.5 |
-| `MAX_POSITION_SIZE` | Maximum GBP per trade | 1000 |
+| `MAX_POSITION_SIZE` | Maximum USD per trade | 1000 |
 | `SLIPPAGE_TOLERANCE` | Expected slippage % | 0.1 |
 | `ENABLE_PAPER_TRADING` | Paper trading mode | true |
 | `MAX_TRADES_PER_HOUR` | Rate limit | 100 |
@@ -205,7 +258,7 @@ asyncio.run(run())
 
 **Risk scoring** (`arbitrage_engine.py`):
 - Wider bid-ask spreads increase risk
-- Low volume pairs penalised
+- Low volume pairs penalized
 - Risk range: 0-100 (lower is better)
 
 **Execution rules** (`executor.py`):
@@ -220,7 +273,7 @@ asyncio.run(run())
 # Increase profit threshold to 1%
 MIN_PROFIT_THRESHOLD=1.0
 
-# Reduce position size to £500
+# Reduce position size to $500
 MAX_POSITION_SIZE=500
 
 # Tighten rate limiting
@@ -299,6 +352,27 @@ This software is for educational purposes only. Cryptocurrency trading carries s
 
 ## Advanced Features
 
+### Graph Neural Network (GNN) Engine
+
+The GNN engine uses Graph Attention Networks (GAT) to learn arbitrage opportunity detection from real market data. See [GNN_ARCHITECTURE.md](GNN_ARCHITECTURE.md) for detailed documentation.
+
+**Architecture:**
+- 3 GAT layers with 128 hidden dimensions
+- Node features: price, volume, volatility, spread
+- Edge features: exchange rates, fees, liquidity
+- Profit regression head with sigmoid activation
+
+**Training:**
+```bash
+# Collect data and train
+python train_gnn_real.py --num-scans 100 --epochs 50
+
+# Compare engines
+python compare_engines.py --num-scans 20
+```
+
+**Status:** Experimental - Model predictions need tuning for production use
+
 ### Backtesting
 
 ```bash
@@ -331,17 +405,19 @@ python test_alerts.py     # Test notifications
 
 Contributions welcome. Areas for improvement:
 - WebSocket integration for faster data
-- Machine learning for opportunity prediction
+- GNN model improvements (hyperparameter tuning, feature engineering)
 - Advanced risk models
 - Additional exchanges
 - Cross-exchange arbitrage
 - Improved execution algorithms
+- GNN profit prediction calibration
 
-## Licence
+## License
 
-MIT Licence
+MIT License
 
-## Acknowledgements
+## Acknowledgments
 
 - [CCXT](https://github.com/ccxt/ccxt) for exchange integration
 - [Rich](https://github.com/Textualize/rich) for terminal UI
+- [PyTorch](https://pytorch.org/) and [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/) for GNN implementation
