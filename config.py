@@ -29,6 +29,13 @@ class TradingConfig(BaseModel):
     base_currencies: List[str] = Field(
         default=["BTC", "ETH", "BNB", "USDT", "USDC"]
     )
+    # GNN mode configuration
+    use_gnn_engine: bool = Field(
+        default_factory=lambda: os.getenv("USE_GNN_ENGINE", "false").lower() == "true"
+    )
+    gnn_model_path: str = Field(
+        default_factory=lambda: os.getenv("GNN_MODEL_PATH", "models/gnn_arbitrage_best.pth")
+    )
 
 
 class RiskConfig(BaseModel):
