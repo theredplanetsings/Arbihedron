@@ -1,32 +1,31 @@
 #!/bin/bash
 # Quick setup script for GNN-based arbitrage detection
-
-echo "🧠 Setting up GNN-based Arbitrage Detection..."
+echo "Setting up GNN-based Arbitrage Detection..."
 echo ""
 
 # Check Python version
 python_version=$(python3 --version 2>&1 | awk '{print $2}')
 echo "✓ Python version: $python_version"
 
-# Create models directory
-echo "📁 Creating models directory..."
+# models directory
+echo "Creating models directory..."
 mkdir -p models
 mkdir -p data
 
-# Install PyTorch
-echo "📦 Installing PyTorch..."
+# PyTorch
+echo "Installing PyTorch..."
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Install PyTorch Geometric
-echo "📦 Installing PyTorch Geometric..."
+# PyTorch Geometric
+echo "Installing PyTorch Geometric..."
 pip install torch-geometric
 
-# Install other ML dependencies
-echo "📦 Installing other dependencies..."
+# other ML dependencies
+echo "Installing other dependencies..."
 pip install scipy scikit-learn
 
-# Optional: matplotlib for plotting
-echo "📦 Installing matplotlib (optional)..."
+# matplotlib for plotting
+echo "Installing matplotlib (optional)..."
 pip install matplotlib
 
 echo ""

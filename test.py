@@ -5,7 +5,6 @@ from datetime import datetime
 from models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection
 from config import config
 
-
 def test_models():
     """Test data models."""
     print("Testing data models...")
@@ -42,7 +41,6 @@ def test_models():
     
     print("ok: All model tests passed!\n")
 
-
 def test_config():
     """Test configuration."""
     print("Testing configuration...")
@@ -57,7 +55,6 @@ def test_config():
     print(f"ok: Paper trading: {config.risk.enable_paper_trading}")
     
     print("ok: All config tests passed!\n")
-
 
 async def test_exchange_client():
     """Test exchange client."""
@@ -87,7 +84,6 @@ async def test_exchange_client():
     except Exception as e:
         print(f"⚠ Exchange client test warning: {e}")
         print("  (This is normal if you don't have API credentials set up)\n")
-
 
 async def test_arbitrage_engine():
     """Test arbitrage engine."""
@@ -120,7 +116,6 @@ async def test_arbitrage_engine():
     except Exception as e:
         print(f"⚠ Engine test warning: {e}\n")
 
-
 def test_utils():
     """Test utility functions."""
     print("Testing utility functions...")
@@ -149,7 +144,6 @@ def test_utils():
     
     print("ok: All utility tests passed!\n")
 
-
 async def run_all_tests():
     """Run all tests."""
     print("=" * 50)
@@ -174,7 +168,6 @@ async def run_all_tests():
     print("=" * 50)
     print("Test Suite Completd")
     print("=" * 50)
-
 
 if __name__ == "__main__":
     try:

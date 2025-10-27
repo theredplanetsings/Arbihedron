@@ -15,7 +15,6 @@ Key advantages:
 4. Can predict opportunities before they fully materialize
 5. Handles dynamic market conditions more efficiently
 """
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -29,8 +28,6 @@ from dataclasses import dataclass
 
 from models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection, MarketSnapshot
 from config import TradingConfig
-
-
 @dataclass
 class GNNConfig:
     """Configuration for GNN arbitrage detection."""
@@ -38,15 +35,13 @@ class GNNConfig:
     num_layers: int = 3
     dropout: float = 0.2
     learning_rate: float = 0.001
-    use_attention: bool = True  # Use GAT instead of GCN
+    use_attention: bool = True  # Uses GAT instead of GCN
     profit_threshold: float = 0.0001  # Minimum profit percentage (very low for testing)
     
     # Deep Q-Learning parameters
     gamma: float = 0.99  # Discount factor
     epsilon: float = 0.1  # Exploration rate
     batch_size: int = 32
-
-
 class CurrencyGraphEncoder(nn.Module):
     """Encodes currency exchange rates as graph node and edge features.
     
@@ -67,10 +62,10 @@ class CurrencyGraphEncoder(nn.Module):
         historical_values: List[float]
     ) -> torch.Tensor:
         """Encode currency node features including interest rates and historical values."""
-        # Use moving averages of different windows as in the paper
+        # uses moving averages of different windows as in the paper
         features = [interest_rate]
         
-        # Add moving averages over different lookback windows
+        # adds moving averages over different lookback windows
         lookback_windows = [1, 3, 5, 10, 15, 20]
         for window in lookback_windows:
             if len(historical_values) >= window:
@@ -95,7 +90,7 @@ class CurrencyGraphEncoder(nn.Module):
             pair.timestamp.timestamp() if pair.timestamp else 0.0
         ]
         
-        # Add historical rate changes
+        # adds historical rate changes
         if len(historical_rates) >= 2 and historical_rates[-2] != 0:
             rate_change = historical_rates[-1] / (historical_rates[-2] + 1e-8)
             features.append(np.log(rate_change + 1e-8))
@@ -103,7 +98,6 @@ class CurrencyGraphEncoder(nn.Module):
             features.append(0.0)
             
         return torch.tensor(features, dtype=torch.float32)
-
 
 class ArbitrageGNN(nn.Module):
     """Graph Neural Network for detecting triangular arbitrage opportunities.
@@ -122,13 +116,13 @@ class ArbitrageGNN(nn.Module):
         super().__init__()
         self.config = config
         
-        # Input projections
+        # the input projections
         self.node_encoder = nn.Linear(node_dim, config.hidden_dim)
         self.edge_encoder = nn.Linear(edge_dim, config.hidden_dim)
         
-        # Graph convolution layers
+        # graph convolution layers
         if config.use_attention:
-            # Use Graph Attention Networks for better relationship learning
+            # uses Graph Attention Networks for better relationship learning
             self.convs = nn.ModuleList([
                 GATConv(
                     config.hidden_dim, 
@@ -146,7 +140,7 @@ class ArbitrageGNN(nn.Module):
                 for _ in range(config.num_layers)
             ])
         
-        # Edge update networks
+        # Edges updates networks
         self.edge_updates = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(config.hidden_dim * 3, config.hidden_dim),  # src, edge, dst
@@ -162,20 +156,20 @@ class ArbitrageGNN(nn.Module):
             nn.Linear(config.hidden_dim, config.hidden_dim // 2),
             nn.ReLU(),
             nn.Dropout(config.dropout),
-            nn.Linear(config.hidden_dim // 2, 1),  # Profit score
-            nn.Sigmoid()  # Normalized profit probability
+            nn.Linear(config.hidden_dim // 2, 1),  # our profit score
+            nn.Sigmoid()  # normalised profit probability
         )
         
         self.profit_regressor = nn.Sequential(
             nn.Linear(config.hidden_dim, config.hidden_dim // 2),
             nn.ReLU(),
             nn.Dropout(config.dropout),
-            nn.Linear(config.hidden_dim // 2, 1),  # Expected profit percentage
+            nn.Linear(config.hidden_dim // 2, 1),  # expected profit percentage
             nn.Sigmoid()  # Output 0-1, will scale to 0-5% range
         )
         
         # Profit scaling: model outputs 0-1, we scale to realistic profit range
-        self.profit_scale = 5.0  # Maximum expected profit percentage (5%)
+        self.profit_scale = 5.0  # max expected profit percentage (5%)
         
     def forward(
         self, 
@@ -196,13 +190,13 @@ class ArbitrageGNN(nn.Module):
             path_scores: [num_edges] probability of profitable arbitrage via this edge
             profit_predictions: [num_edges] expected profit percentage
         """
-        # Encode inputs
+        # encodes inputs
         x = F.relu(self.node_encoder(node_features))
         edge_attr = F.relu(self.edge_encoder(edge_features))
         
-        # Message passing through graph layers
+        # message passing through graph layers
         for i, conv in enumerate(self.convs):
-            # Update node embeddings
+            # updates node embeddings
             if self.config.use_attention:
                 x = conv(x, edge_index, edge_attr=edge_attr)
             else:
@@ -210,18 +204,18 @@ class ArbitrageGNN(nn.Module):
             x = F.relu(x)
             x = F.dropout(x, p=self.config.dropout, training=self.training)
             
-            # Update edge embeddings based on connected nodes
+            # updates edge embeddings based on connected nodes
             src, dst = edge_index
             edge_input = torch.cat([x[src], edge_attr, x[dst]], dim=-1)
             edge_attr = self.edge_updates[i](edge_input)
             edge_attr = F.relu(edge_attr)
         
-        # Predict profitability for each edge (potential trade)
+        # predicts profitability for each edge (potential trade)
         path_scores = self.path_predictor(edge_attr).squeeze(-1)
         profit_predictions_raw = self.profit_regressor(edge_attr).squeeze(-1)
         
-        # Scale profit predictions from [0,1] to [0, profit_scale]
-        # This constrains predictions to realistic range (0-5%)
+        # scales the profit predictions from [0,1] to [0, profit_scale]
+        # this constrains predictions to realistic range (0-5%)
         profit_predictions = profit_predictions_raw * self.profit_scale
         
         return path_scores, profit_predictions
@@ -246,8 +240,7 @@ class ArbitrageGNN(nn.Module):
             path_scores, profit_preds = self.forward(
                 node_features, edge_index, edge_features
             )
-        
-        # Build adjacency list for cycle detection
+        # builds the adjacency list for cycle detection
         num_nodes = node_features.shape[0]
         adj_list = {i: [] for i in range(num_nodes)}
         
@@ -261,10 +254,10 @@ class ArbitrageGNN(nn.Module):
             
             adj_list[src].append((dst, idx, score, profit))
         
-        # Find triangular cycles (3-hop paths back to start)
+        # finds all triangular cycles (3-hop paths back to start)
         cycles = []
         
-        # Debug: Track all predictions
+        # debug: track all predictions
         all_cycle_profits = []
         
         for start_node in range(num_nodes):
@@ -277,21 +270,21 @@ class ArbitrageGNN(nn.Module):
                     if mid2 == start_node or mid2 == mid1:
                         continue
                     
-                    # Check if we can get back to start
+                    # checks if we can get back to start
                     for end, edge3_idx, score3, profit3 in adj_list[mid2]:
                         if end == start_node:
-                            # Found a triangular cycle!
+                            # we found a triangular cycle!
                             cycle_score = score1 * score2 * score3
                             cycle_profit = profit1 + profit2 + profit3
                             
                             all_cycle_profits.append(cycle_profit)
                             
-                            # Only include if above threshold
+                            # only includes if above threshold
                             if cycle_profit > self.config.profit_threshold:
                                 path = [start_node, mid1, mid2, start_node]
                                 cycles.append((path, cycle_profit, cycle_score))
         
-        # Debug logging
+        # debug logging
         if all_cycle_profits:
             logger.info(f" GNN analyzed {len(all_cycle_profits)} triangular cycles")
             logger.info(f"   Profit predictions - min: {min(all_cycle_profits):.4f}%, "
@@ -301,7 +294,7 @@ class ArbitrageGNN(nn.Module):
         else:
             logger.warning("No triangular cycles found in graph!")
         
-        # Sort by expected profit
+        # sorts by expected profit
         cycles.sort(key=lambda x: x[1], reverse=True)
         
         return cycles
@@ -330,18 +323,18 @@ class GNNArbitrageEngine:
         self.currency_map: Dict[str, int] = {}
         self.reverse_currency_map: Dict[int, str] = {}
         self.pair_map: Dict[str, TradingPair] = {}
-        self.triangular_paths: List[List[str]] = []  # Discovered triangular paths
+        self.triangular_paths: List[List[str]] = []  # our discovered triangular paths
         
-        # Historical data for feature computation
+        # historical data for feature computation
         self.historical_rates: Dict[str, List[float]] = {}
         self.historical_values: Dict[str, List[float]] = {}
         
-        # Initialize model (will be created after seeing data dimensions)
+        # initialises the model (will be created after seeing data dimensions)
         self.model: Optional[ArbitrageGNN] = None
         self.graph_encoder = None
         self.optimizer = None
         
-        # Load pre-trained model if path provided
+        # loads the pre-trained model if path provided
         if model_path:
             self.load_model(model_path)
             
@@ -357,7 +350,7 @@ class GNNArbitrageEngine:
     
     def _discover_triangular_paths(self):
         """Discover all valid triangular arbitrage paths (same as traditional engine)."""
-        # Build currency graph
+        # builds the currency graph
         currency_graph = {}
         for symbol in self.exchange.markets.keys():
             try:
@@ -371,7 +364,7 @@ class GNNArbitrageEngine:
             except ValueError:
                 continue
         
-        # Find triangular paths - ONLY starting from base currencies (like traditional engine)
+        # finds any triangular paths - ONLY starting from base currencies (like traditional engine)
         base_currencies = set(self.config.base_currencies)
         paths = set()
         for start_currency in base_currencies:
@@ -402,7 +395,7 @@ class GNNArbitrageEngine:
             except ValueError:
                 continue
         
-        # Create bidirectional mapping
+        # creates the bidirectional mapping
         for idx, currency in enumerate(sorted(currencies)):
             self.currency_map[currency] = idx
             self.reverse_currency_map[idx] = currency
@@ -443,7 +436,7 @@ class GNNArbitrageEngine:
         num_currencies = len(self.currency_map)
         node_features = torch.zeros((num_currencies, 7))
         
-        # Build node features (using dummy interest rates for now)
+        # builds node features (using dummy interest rates for now)
         for currency, idx in self.currency_map.items():
             interest_rate = 0.01  # Default, should be fetched from real data
             historical = self.historical_values.get(currency, [1.0])
@@ -452,7 +445,7 @@ class GNNArbitrageEngine:
                 currency, interest_rate, historical
             )
         
-        # Build edge index and features
+        # builds edge index and features
         edge_list_src = []
         edge_list_dst = []
         edge_features_list = []
@@ -466,22 +459,22 @@ class GNNArbitrageEngine:
                 historical = self.historical_rates.get(pair.symbol, [pair.bid])
                 edge_feat = self.graph_encoder.encode_edge_features(pair, historical)
                 
-                # Add forward edge (base -> quote using ASK price)
+                # adds forward edge (base -> quote using ASK price)
                 edge_list_src.append(src_idx)
                 edge_list_dst.append(dst_idx)
                 edge_features_list.append(edge_feat)
                 
-                # Add reverse edge (quote -> base using BID price)
-                # Create inverted features for the reverse direction
+                # adds reverse edge (quote -> base using BID price)
+                # creates inverted features for the reverse direction
                 reverse_feat = edge_feat.clone()
-                # Swap bid/ask for reverse direction
+                # swa[s] bid/ask for reverse direction
                 reverse_feat[0], reverse_feat[1] = edge_feat[1], edge_feat[0]  # Swap log(bid) and log(ask)
                 
                 edge_list_src.append(dst_idx)
                 edge_list_dst.append(src_idx)
                 edge_features_list.append(reverse_feat)
                 
-                # Store for future use
+                # s tores for future use
                 self.pair_map[pair.symbol] = pair
                 
             except (ValueError, KeyError):
@@ -500,9 +493,8 @@ class GNNArbitrageEngine:
     async def scan_opportunities(self) -> MarketSnapshot:
         """Scan for arbitrage opportunities using the GNN model."""
         timestamp = datetime.now()
-        
-        # Only fetch symbols that are part of discovered triangular paths
-        # (same optimization as traditional engine)
+        # only fetches symbols that are part of discovered triangular paths
+        # (same optimisation as traditional engine)
         symbols_needed = set()
         for path in self.triangular_paths:
             for i in range(len(path) - 1):
@@ -511,19 +503,19 @@ class GNNArbitrageEngine:
                 symbols_needed.add(f"{from_curr}/{to_curr}")
                 symbols_needed.add(f"{to_curr}/{from_curr}")
         
-        # Only fetch symbols that exist in the exchange
+        # onles fetches symbols that exist in the exchange
         symbols_list = [s for s in symbols_needed if s in self.exchange.markets]
         trading_pairs = await self.exchange.fetch_tickers_batch(symbols_list)
         
-        # Update historical data
+        # updates the historical data
         self._update_historical_data(trading_pairs)
         
-        # Build graph representation
+        # builds the graph representation
         node_features, edge_index, edge_features = self._build_graph_from_snapshot(
             trading_pairs
         )
         
-        # Run GNN inference
+        # runs the GNN inference
         if self.model is None:
             logger.warning("Model not initialized, skipping GNN scan")
             return MarketSnapshot(
@@ -539,16 +531,15 @@ class GNNArbitrageEngine:
             self.currency_map
         )
         
-        # Convert cycles to ArbitrageOpportunity objects
+        # converts cycles to ArbitrageOpportunity objects
         opportunities = []
-        
         for path_indices, expected_profit, confidence in cycles[:10]:  # Top 10
-            # Convert indices back to currency symbols
+            # converts indices back to currency symbols
             path_currencies = [
                 self.reverse_currency_map[idx] for idx in path_indices
             ]
             
-            # Build TriangularPath object
+            # builds TriangularPath object
             triangular_path = self._build_triangular_path(
                 path_currencies, 
                 expected_profit
@@ -586,7 +577,7 @@ class GNNArbitrageEngine:
             mid_price = (pair.bid + pair.ask) / 2
             self.historical_rates[pair.symbol].append(mid_price)
             
-            # Keep only recent history (e.g., last 30 data points)
+            # keeps only recent history (e.g., last 30 data points)
             if len(self.historical_rates[pair.symbol]) > 30:
                 self.historical_rates[pair.symbol] = self.historical_rates[pair.symbol][-30:]
     
@@ -603,7 +594,7 @@ class GNNArbitrageEngine:
             from_curr = path[i]
             to_curr = path[i + 1]
             
-            # Try to find the trading pair
+            # tries to find the trading pair
             symbol_direct = f"{from_curr}/{to_curr}"
             symbol_inverse = f"{to_curr}/{from_curr}"
             
@@ -702,7 +693,7 @@ class GNNArbitrageEngine:
     
     def load_model(self, path: str):
         """Load a pre-trained model from disk."""
-        # Use weights_only=False since we need to load the config object
+        # Uses weights_only=False since we need to load the config object
         # This is safe since we trust our own trained models
         checkpoint = torch.load(path, weights_only=False)
         

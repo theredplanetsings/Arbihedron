@@ -5,7 +5,6 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from datetime import datetime
-
 from config import config
 from exchange_client import ExchangeClient
 from arbitrage_engine import ArbitrageEngine
@@ -18,22 +17,22 @@ async def main():
     console.print(Panel.fit("  GNN vs Traditional Arbitrage Detection", style="bold magenta"))
     console.print()
     
-    # Initialize exchange
+    # initialises exchange
     exchange = ExchangeClient(config.exchange)
     console.print("🔄 Initializing engines...", style="cyan")
     
-    # Traditional engine
+    # our traditional engine
     traditional_engine = ArbitrageEngine(exchange, config.trading)
     await traditional_engine.initialize()
     console.print("OK Traditional engine ready", style="green")
     
-    # GNN engine with trained model
+    # our GNN engine with trained model
     gnn_config = GNNConfig(hidden_dim=128, num_layers=3)
     gnn_engine = GNNArbitrageEngine(
         exchange, 
         config.trading, 
         gnn_config,
-        model_path="models/gnn_arbitrage_best.pth"  # Load trained model
+        model_path="models/gnn_arbitrage_best.pth"  # loads the trained model
     )
     await gnn_engine.initialize()
     console.print("OK GNN engine ready (trained model loaded)", style="green")
@@ -42,24 +41,24 @@ async def main():
     console.print(" Scanning for opportunities...", style="cyan")
     console.print()
     
-    # Scan with traditional
+    # scans with traditional method
     trad_start = datetime.now()
     trad_snapshot = await traditional_engine.scan_opportunities()
     trad_time = (datetime.now() - trad_start).total_seconds()
     
-    # Scan with GNN
+    # scans with GNN
     gnn_start = datetime.now()
     gnn_snapshot = await gnn_engine.scan_opportunities()
     gnn_time = (datetime.now() - gnn_start).total_seconds()
     
-    # Create comparison table
+    # creates comparison table
     table = Table(title="  Performance Comparison", show_header=True, header_style="bold magenta")
     table.add_column("Metric", style="cyan", width=30)
     table.add_column("Traditional", justify="right", style="yellow")
     table.add_column("GNN", justify="right", style="green")
     table.add_column("Difference", justify="right", style="white")
     
-    # Scan time
+    # scans the time
     time_diff = ((gnn_time - trad_time) / trad_time * 100) if trad_time > 0 else 0
     table.add_row(
         "Scan Time",
@@ -68,7 +67,7 @@ async def main():
         f"{time_diff:+.1f}%" if time_diff != 0 else "same"
     )
     
-    # Opportunities found
+    # opportunities we've found
     trad_opps = len(trad_snapshot.opportunities)
     gnn_opps = len(gnn_snapshot.opportunities)
     opp_diff = gnn_opps - trad_opps
@@ -87,7 +86,7 @@ async def main():
         "same"
     )
     
-    # Paths explored (estimate for traditional)
+    # paths explored (estimate for traditional)
     num_currencies = len(traditional_engine.base_currencies)
     trad_paths = len(traditional_engine.triangular_paths)
     table.add_row(
@@ -100,7 +99,7 @@ async def main():
     console.print(table)
     console.print()
     
-    # Show top opportunities from each
+    # shows the top opportunities from each
     if trad_snapshot.opportunities:
         console.print(Panel.fit(" Traditional Engine - Top 3 Opportunities", style="yellow"))
         for i, opp in enumerate(trad_snapshot.opportunities[:3], 1):
@@ -129,7 +128,7 @@ async def main():
         console.print("GNN: No opportunities found (trained model loaded)", style="yellow dim")
         console.print()
     
-    # Analysis
+    # the analysis
     console.print()
     console.print(Panel.fit(
         f" Analysis\n\n"

@@ -1,10 +1,9 @@
 """Train GNN on real arbitrage opportunities from traditional engine.
 
-This script collects actual profitable arbitrage cycles detected by the
-traditional engine and uses them to train the GNN model, ensuring the
-model learns real market patterns instead of synthetic data.
+Collects actual profitable arbitrage cycles detected by the traditional
+engine and trains the GNN model on them, so it learns real market patterns
+instead of synthetic data.
 """
-
 import asyncio
 import torch
 import numpy as np
@@ -24,9 +23,8 @@ from models import TradingPair
 
 console = Console()
 
-
 class RealDataGNNTrainer:
-    """Trainer that uses real arbitrage opportunities."""
+    """Trains using real arbitrage opportunities."""
     
     def __init__(
         self,
@@ -40,7 +38,7 @@ class RealDataGNNTrainer:
         self.training_samples = []
         self.validation_split = 0.2
         
-        # Initialize optimizer
+        # initialises optimiser
         self.optimizer = torch.optim.Adam(
             self.gnn_engine.model.parameters(),
             lr=0.001
@@ -79,38 +77,38 @@ class RealDataGNNTrainer:
             
             for scan_num in range(num_scans):
                 try:
-                    # Scan market with traditional engine (finds real opportunities)
+                    # scans market with traditional engine (finds real opportunities)
                     snapshot = await self.traditional_engine.scan_opportunities()
                     
                     if snapshot.opportunities:
                         opportunities_found += len(snapshot.opportunities)
                         
-                        # Build GNN graph representation
+                        # builds the GNN graph representation
                         node_features, edge_index, edge_features = \
                             self.gnn_engine._build_graph_from_snapshot(snapshot.pairs)
                         
-                        # Create labels: mark edges involved in profitable paths
+                        # creates our labels: mark edges involved in profitable paths
                         profits = torch.zeros(edge_index.shape[1])
                         
                         for opp in snapshot.opportunities:
-                            # Mark each edge in the profitable path
+                            # marks each edge in the profitable path
                             for pair in opp.path.pairs:
                                 try:
                                     base, quote = pair.symbol.split('/')
                                     src_idx = self.gnn_engine.currency_map[base]
                                     dst_idx = self.gnn_engine.currency_map[quote]
                                     
-                                    # Find matching edges
+                                    # find all matching edges
                                     for edge_i in range(edge_index.shape[1]):
                                         if (edge_index[0, edge_i] == src_idx and 
                                             edge_index[1, edge_i] == dst_idx):
-                                            # Mark this edge as profitable
+                                            # marks this edge as profitable
                                             profits[edge_i] = opp.path.profit_percentage
                                             break
                                 except (ValueError, KeyError):
                                     continue
                         
-                        # Save training sample
+                        # saves the training sample
                         self.training_samples.append((
                             node_features,
                             edge_index,
@@ -119,17 +117,17 @@ class RealDataGNNTrainer:
                         ))
                         
                         progress.console.print(
-                            f"   [green]OK[/green] Scan {scan_num + 1}: Found {len(snapshot.opportunities)} opportunities "
+                            f"   [green]+[/green] Scan {scan_num + 1}: Found {len(snapshot.opportunities)} opportunities "
                             f"(total: {opportunities_found})"
                         )
                     else:
                         progress.console.print(
-                            f"   [dim]o[/dim] Scan {scan_num + 1}: No opportunities"
+                            f"   [dim]-[/dim] Scan {scan_num + 1}: No opportunities"
                         )
                     
                     progress.update(task, advance=1)
                     
-                    # Wait before next scan (unless last scan)
+                    # wait before next scan (unless last scan)
                     if scan_num < num_scans - 1:
                         await asyncio.sleep(wait_between_scans)
                         
@@ -156,7 +154,7 @@ class RealDataGNNTrainer:
         
         split_idx = int(len(self.training_samples) * (1 - self.validation_split))
         
-        # Shuffle data
+        # shuffles the data
         indices = np.random.permutation(len(self.training_samples))
         shuffled = [self.training_samples[i] for i in indices]
         
@@ -171,7 +169,7 @@ class RealDataGNNTrainer:
         self.gnn_engine.model.train()
         total_loss = 0.0
         
-        # Maximum profit for normalization (5%)
+        # max profit for normalisation (5%)
         MAX_PROFIT = 5.0
         
         for node_features, edge_index, edge_features, profit_labels in train_data:
@@ -181,7 +179,7 @@ class RealDataGNNTrainer:
                 node_features, edge_index, edge_features
             )
             
-            # Classification: is edge part of profitable path?
+            # classification: is edge part of profitable path?
             is_profitable = (profit_labels > 0).float()
             class_loss = torch.nn.functional.binary_cross_entropy(
                 path_scores, is_profitable
@@ -189,7 +187,7 @@ class RealDataGNNTrainer:
             
             # Regression: predict profit percentage
             # Model outputs are already scaled to [0, 5] range by profit_scale
-            # Compare directly to raw profit labels
+            # compa res directly to raw profit labels
             profitable_mask = profit_labels > 0
             if profitable_mask.sum() > 0:
                 regression_loss = torch.nn.functional.mse_loss(
@@ -223,7 +221,7 @@ class RealDataGNNTrainer:
                     path_scores, is_profitable
                 )
                 
-                # Regression loss - compare model outputs (0-5 range) directly to profit labels
+                # regression loss - compares model outputs (0-5 range) directly to profit labels
                 profitable_mask = profit_labels > 0
                 if profitable_mask.sum() > 0:
                     regression_loss = torch.nn.functional.mse_loss(
@@ -281,7 +279,7 @@ class RealDataGNNTrainer:
                 history['train_loss'].append(train_loss)
                 history['val_loss'].append(val_loss)
                 
-                # Save best model
+                # saves the best model
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
                     patience_counter = 0
@@ -299,7 +297,7 @@ class RealDataGNNTrainer:
                 
                 progress.update(task, advance=1)
                 
-                # Early stopping
+                # early stopping
                 if patience_counter >= patience:
                     progress.console.print(
                         f"\n   [yellow]WARNING[/yellow] Early stopping triggered (no improvement for {patience} epochs)"
@@ -317,12 +315,12 @@ async def main():
     console.print("[bold cyan] GNN Training on Real Market Data[/bold cyan]")
     console.print()
     
-    # Initialize components
+    # initialises components
     logger.info(" Initializing engines...")
     exchange = ExchangeClient(config.exchange)
     db = ArbihedronDatabase()  # Uses default path "data/arbihedron.db"
     
-    # Traditional engine (to find real opportunities)
+    # traditional engine (to find real opportunities)
     traditional_engine = ArbitrageEngine(exchange, config.trading)
     await traditional_engine.initialize()
     logger.info("OK Traditional engine ready")
@@ -335,15 +333,15 @@ async def main():
     
     console.print()
     
-    # Create trainer
+    # creates the trainer
     trainer = RealDataGNNTrainer(traditional_engine, gnn_engine, db)
     
-    # Collect real data
+    # collects real data
     console.print("[bold]Phase 1: Data Collection[/bold]")
     console.print("Collecting real arbitrage opportunities from live markets...")
     console.print()
     
-    # Start with fewer scans for faster testing (increase for production)
+    # starts with fewer scans for faster testing (increase for production)
     num_samples = await trainer.collect_real_opportunities(
         num_scans=50,  # 50 scans
         wait_between_scans=30  # 30 seconds between scans = ~25 minutes total
@@ -357,14 +355,14 @@ async def main():
         logger.error("   3. Traditional engine configuration issue")
         return
     
-    # Train model
+    # trains model
     console.print("[bold]Phase 2: Model Training[/bold]")
     console.print(f"Training GNN on {num_samples} real market snapshots...")
     console.print()
     
     history = trainer.train(epochs=100, patience=15)
     
-    # Summary
+    # print summary
     console.print()
     console.print("[bold green] Training Pipeline Complete![/bold green]")
     console.print()

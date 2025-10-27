@@ -2,7 +2,6 @@
 Arbihedron Health Monitor
 Provides HTTP health check endpoint and system health tracking.
 """
-
 import asyncio
 import logging
 from datetime import datetime, timedelta
@@ -257,7 +256,7 @@ class HealthMonitor:
             </style>
         </head>
         <body>
-            <h1>🏥 Arbihedron Health Status</h1>
+            <h1>Arbihedron Health Status</h1>
             <div class="metric">
                 <span class="label">Status:</span> 
                 <span class="{self.metrics.health_status}">{self.metrics.health_status.upper()}</span>

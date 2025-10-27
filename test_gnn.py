@@ -45,20 +45,20 @@ async def test_gnn_initialization():
         from exchange_client import ExchangeClient
         from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
         
-        # Create minimal exchange client
+        # creates minimal exchange client
         exchange = ExchangeClient(config.exchange)
         console.print("OK Exchange client created", style="green")
         
-        # Create GNN config
+        # creates GNN config
         gnn_config = GNNConfig(
-            hidden_dim=64,  # Smaller for testing
+            hidden_dim=64,  # smaller for testing
             num_layers=2,
             dropout=0.2,
             profit_threshold=0.5
         )
         console.print("OK GNN config created", style="green")
         
-        # Create GNN engine
+        # creates our GNN engine
         engine = GNNArbitrageEngine(
             exchange_client=exchange,
             config=config.trading,
@@ -66,11 +66,11 @@ async def test_gnn_initialization():
         )
         console.print("OK GNN engine created", style="green")
         
-        # Initialize
+        # initialise
         await engine.initialize()
         console.print("OK GNN engine initialized", style="green")
         
-        # Check model
+        # checks the model
         if engine.model is not None:
             console.print(f"OK GNN model initialized with {sum(p.numel() for p in engine.model.parameters())} parameters", style="green")
         else:
@@ -90,14 +90,14 @@ async def test_graph_construction(engine):
     console.print(Panel.fit(" Testing Graph Construction", style="bold cyan"))
     
     try:
-        # Fetch some market data
-        symbols = list(engine.exchange.markets.keys())[:10]  # Just first 10 pairs
+        # fetches some market data
+        symbols = list(engine.exchange.markets.keys())[:10]  # just the first 10 pairs
         console.print(f"Fetching data for {len(symbols)} trading pairs...")
         
         trading_pairs = await engine.exchange.fetch_tickers_batch(symbols)
         console.print(f"OK Fetched {len(trading_pairs)} trading pairs", style="green")
         
-        # Build graph
+        # builds the graph
         node_features, edge_index, edge_features = engine._build_graph_from_snapshot(trading_pairs)
         
         console.print(f"OK Graph constructed:", style="green")
@@ -124,7 +124,7 @@ async def test_gnn_inference(engine, node_features, edge_index, edge_features):
             console.print("X No graph data available", style="red")
             return False
         
-        # Run model inference
+        # runs the model inference
         engine.model.eval()
         import torch
         with torch.no_grad():
@@ -138,7 +138,7 @@ async def test_gnn_inference(engine, node_features, edge_index, edge_features):
         console.print(f"  - Mean path score: {path_scores.mean().item():.4f}", style="cyan")
         console.print(f"  - Mean profit prediction: {profit_preds.mean().item():.4f}%", style="cyan")
         
-        # Count potentially profitable edges
+        # counts potentially profitable edges
         profitable_count = (profit_preds > engine.gnn_config.profit_threshold).sum().item()
         console.print(f"  - Potentially profitable edges: {profitable_count}/{len(profit_preds)}", style="cyan")
         
@@ -156,7 +156,7 @@ async def test_cycle_detection(engine):
     console.print(Panel.fit("🔺 Testing Cycle Detection", style="bold cyan"))
     
     try:
-        # Scan for opportunities
+        # scans for opportunities
         snapshot = await engine.scan_opportunities()
         
         console.print(f"OK Scan completed", style="green")
@@ -217,7 +217,7 @@ async def main():
     # Test 5: Cycle detection
     await test_cycle_detection(engine)
     
-    # Summary
+    # our summary
     console.print("\n")
     console.print(Panel.fit(
         " All Tests Completed!\n\n"

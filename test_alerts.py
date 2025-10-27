@@ -126,7 +126,6 @@ async def test_alert_system():
     
     console.print("\n[bold green]Alert system test complete![/bold green]\n")
 
-
 def main():
     """Entry point."""
     try:
@@ -138,7 +137,6 @@ def main():
         console = Console()
         console.print(f"\n[red]Error: {e}[/red]")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

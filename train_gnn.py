@@ -9,7 +9,6 @@ Training data can come from:
 2. Backtested opportunities with actual profit outcomes
 3. Synthetic data generated from market simulations
 """
-
 import asyncio
 import torch
 import numpy as np
@@ -23,7 +22,6 @@ from exchange_client import ExchangeClient
 from database import ArbihedronDatabase
 from config import config
 from models import ArbitrageOpportunity, TradingPair
-
 
 class GNNTrainer:
     """Trainer for the GNN arbitrage detection model."""
@@ -69,41 +67,40 @@ class GNNTrainer:
         """
         logger.info(f"Loading training data from last {days_back} days...")
         
-        # Get all sessions from the specified time range
+        # gets all sessions from the specified time range
         cutoff_date = datetime.now() - timedelta(days=days_back)
         sessions = self.db.get_recent_sessions(days=days_back)
         
         training_samples = []
         
         for session in sessions:
-            # Get all opportunities from this session
+            # gets all opportunities from this session
             opportunities = self.db.get_session_opportunities(session['id'])
             
             if not opportunities:
                 continue
             
-            # Get executions to know actual profits
+            # gets the executions to know actual profits
             executions = self.db.get_session_executions(session['id'])
             execution_map = {
                 exec['opportunity_id']: exec 
                 for exec in executions
             }
             
-            # Build training sample for each opportunity
+            # builds the training sample for each opportunity
             for opp in opportunities:
-                # Extract actual profit if executed
+                # extracts actual profit if executed
                 actual_profit = 0.0
                 if opp['id'] in execution_map:
                     exec_data = execution_map[opp['id']]
                     if exec_data['success']:
                         actual_profit = exec_data['actual_profit_pct']
                 else:
-                    # Use predicted profit if not executed (could be noise)
+                    # uses predicted profit if not executed (could be noise)
                     actual_profit = opp['expected_profit_pct']
                 
                 # TODO: Reconstruct graph from opportunity data
-                # For now, we'll use a simplified approach
-                # In practice, you'd want to store full market snapshots
+                # atm, we'll use a simplified approach
                 
         logger.info(f"Loaded {len(training_samples)} training samples")
         return training_samples
@@ -137,17 +134,17 @@ class GNNTrainer:
         
         logger.info(f"Base snapshot has {len(base_snapshot.pairs)} trading pairs")
         
-        # Generate synthetic variations based on real market structure
+        # generates synthetic variations based on real market structure
         for i in range(num_samples):
-            # Create a copy with price variations
+            # creates a copy with price variations
             synthetic_pairs = []
             
             for pair in base_snapshot.pairs:
-                # Add small random variations to prices (±2%)
+                # adds small random variations to prices (±2%)
                 price_variation = np.random.uniform(0.98, 1.02)
                 volume_variation = np.random.uniform(0.8, 1.2)
                 
-                # Create a shallow copy and modify prices
+                # creates a shallow copy and modify prices
                 from copy import copy
                 synthetic_pair = copy(pair)
                 synthetic_pair.bid = pair.bid * price_variation
@@ -157,15 +154,15 @@ class GNNTrainer:
                 
                 synthetic_pairs.append(synthetic_pair)
             
-            # Build graph from synthetic snapshot
+            # builds the graph from synthetic snapshot
             node_features, edge_index, edge_features = \
                 self.engine._build_graph_from_snapshot(synthetic_pairs)
             
-            # Create profit labels
+            # creates the profit labels
             # Most edges have no profit, but randomly inject some profitable cycles
             profits = torch.zeros(edge_index.shape[1])
             
-            # Randomly make 1-3% of edges part of profitable cycles
+            # randomly makes 1-3% of edges part of profitable cycles
             num_profitable_edges = int(len(profits) * np.random.uniform(0.01, 0.03))
             if num_profitable_edges > 0:
                 profitable_indices = np.random.choice(
@@ -173,7 +170,7 @@ class GNNTrainer:
                     size=num_profitable_edges, 
                     replace=False
                 )
-                # Assign small profit percentages (0.1% to 2%)
+                # assigns small profit percentages (0.1% to 2%)
                 for idx in profitable_indices:
                     profits[idx] = np.random.uniform(0.1, 2.0)
             
@@ -197,7 +194,7 @@ class GNNTrainer:
         """Split data into training and validation sets."""
         split_idx = int(len(data) * (1 - self.validation_split))
         
-        # Shuffle data
+        # shuffles data
         indices = np.random.permutation(len(data))
         data = [data[i] for i in indices]
         
@@ -219,7 +216,7 @@ class GNNTrainer:
         total_loss = 0.0
         batch_size = self.engine.gnn_config.batch_size
         
-        # Shuffle training data
+        # shuffles the training data
         indices = np.random.permutation(len(train_data))
         
         for i in range(0, len(train_data), batch_size):
@@ -256,7 +253,7 @@ class GNNTrainer:
                     node_feat, edge_idx, edge_feat
                 )
                 
-                # Calculate validation loss
+                # calculating the validation loss
                 profitable = (profits > self.engine.gnn_config.profit_threshold).float()
                 classification_loss = torch.nn.functional.binary_cross_entropy(
                     path_scores, profitable
@@ -281,7 +278,7 @@ class GNNTrainer:
             data: Training data
             save_path: Path to save the best model
         """
-        # Split data
+        # splitting the data
         train_data, val_data = self.split_data(data)
         
         if not train_data:
@@ -290,21 +287,21 @@ class GNNTrainer:
         
         logger.info(f"Starting training for {self.num_epochs} epochs...")
         
-        # Create save directory
+        # creates save directory
         save_dir = Path(save_path).parent
         save_dir.mkdir(parents=True, exist_ok=True)
         
         for epoch in range(self.num_epochs):
-            # Training
+            # training
             train_loss = self.train_epoch(train_data)
             self.train_losses.append(train_loss)
             
-            # Validation
+            # validation
             if val_data:
                 val_loss = self.validate(val_data)
                 self.val_losses.append(val_loss)
                 
-                # Save best model
+                # saves the best model
                 if val_loss < self.best_val_loss:
                     self.best_val_loss = val_loss
                     self.engine.save_model(save_path)
@@ -347,7 +344,7 @@ async def main():
     """Main training script."""
     logger.info(" Starting GNN training pipeline...")
     
-    # Initialize components
+    # initialises components
     exchange = ExchangeClient(config.exchange)
     
     database = ArbihedronDatabase("data/arbihedron.db")
@@ -368,7 +365,7 @@ async def main():
     
     await engine.initialize()
     
-    # Initialize trainer
+    # initialises trainer
     trainer = GNNTrainer(
         engine=engine,
         database=database,
@@ -376,7 +373,7 @@ async def main():
         validation_split=0.2
     )
     
-    # Generate or load training data
+    # generates or loads training data
     logger.info("Collecting training data...")
     
     # Option 1: Load from database (if you have historical data)
@@ -389,13 +386,13 @@ async def main():
         logger.error("No training data collected! Exiting.")
         return
     
-    # Train the model
+    # trains the model
     await trainer.train(
         data=training_data,
         save_path="models/gnn_arbitrage_best.pth"
     )
     
-    # Plot results
+    # plots results
     trainer.plot_training_curves("models/training_curves.png")
     
     logger.info(" Training pipeline complete!")
