@@ -13,6 +13,14 @@ from executor import TradeExecutor
 from monitor import ArbitrageMonitor
 from database import ArbihedronDatabase
 
+# GNN imports (conditional)
+try:
+    from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+    GNN_AVAILABLE = True
+except ImportError:
+    GNN_AVAILABLE = False
+    logger.warning("GNN dependencies not installed. Run: pip install torch torch-geometric")
+
 class ArbihedronBot:
     """Main arbitrage bot orchestrator."""
     def __init__(self):
@@ -29,7 +37,28 @@ class ArbihedronBot:
         
         # gets all the main components set up
         self.exchange = ExchangeClient(config.exchange)
-        self.engine = ArbitrageEngine(self.exchange, config.trading)
+        
+        # Choose between traditional and GNN engine
+        if config.trading.use_gnn_engine:
+            if not GNN_AVAILABLE:
+                logger.error("GNN mode requested but dependencies not available!")
+                logger.error("Install with: pip install torch torch-geometric")
+                raise RuntimeError("GNN mode unavailable")
+            
+            logger.info("🧠 Using GNN-based arbitrage detection")
+            gnn_config = GNNConfig(
+                profit_threshold=config.trading.min_profit_threshold
+            )
+            self.engine = GNNArbitrageEngine(
+                self.exchange, 
+                config.trading,
+                gnn_config,
+                model_path=config.trading.gnn_model_path if config.trading.gnn_model_path else None
+            )
+        else:
+            logger.info("🔍 Using traditional exhaustive search")
+            self.engine = ArbitrageEngine(self.exchange, config.trading)
+        
         self.executor = TradeExecutor(self.exchange, config.risk, self.db)
         self.monitor = ArbitrageMonitor(self.db)
         self.console = Console()

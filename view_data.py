@@ -6,8 +6,6 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from database import ArbihedronDatabase
-
-
 def show_sessions(db: ArbihedronDatabase):
     """Display all trading sessions."""
     console = Console()
@@ -179,7 +177,6 @@ def show_summary(db: ArbihedronDatabase):
         f"[green]Last Trade:[/] {exec_stats['last_trade'] or 'N/A'}\n",
         title="Statistics"
     ))
-
 
 def main():
     """Main entry point."""

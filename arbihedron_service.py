@@ -87,7 +87,7 @@ class ArbihedronService:
                 await self.alert_manager.initialize()
                 logger.info("Alert manager initialised")
                 
-                # Send startup alert
+                # sends a startup alert
                 await self.alert_manager.alert_startup(version="1.0")
             
             # initialises health monitor

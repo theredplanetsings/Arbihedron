@@ -3,8 +3,6 @@
 from datetime import datetime
 from database import ArbihedronDatabase
 from models import ArbitrageOpportunity, TradeExecution, TriangularPath, TradingPair, TradeDirection
-
-
 def test_basic_operations():
     """Test basic database operations."""
     print("Testing arbihedron database...")
@@ -100,7 +98,6 @@ def test_basic_operations():
     # closes database
     db.close()
     print("\nall tests passed!")
-
 
 if __name__ == "__main__":
     test_basic_operations()

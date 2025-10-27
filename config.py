@@ -6,14 +6,12 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
 load_dotenv()
-
 class ExchangeConfig(BaseModel):
     """Exchange configuration."""
     name: str = Field(default_factory=lambda: os.getenv("EXCHANGE_NAME", "kraken"))
     api_key: str = Field(default_factory=lambda: os.getenv("API_KEY", ""))
     api_secret: str = Field(default_factory=lambda: os.getenv("API_SECRET", ""))
     testnet: bool = Field(default=False)  # most exchanges don't have testnet
-
 
 class TradingConfig(BaseModel):
     """Trading parameters configuration."""
@@ -29,7 +27,13 @@ class TradingConfig(BaseModel):
     base_currencies: List[str] = Field(
         default=["BTC", "ETH", "BNB", "USDT", "USDC"]
     )
-
+    # GNN mode configuration
+    use_gnn_engine: bool = Field(
+        default_factory=lambda: os.getenv("USE_GNN_ENGINE", "false").lower() == "true"
+    )
+    gnn_model_path: str = Field(
+        default_factory=lambda: os.getenv("GNN_MODEL_PATH", "models/gnn_arbitrage_best.pth")
+    )
 
 class RiskConfig(BaseModel):
     """Risk management configuration."""
@@ -42,7 +46,6 @@ class RiskConfig(BaseModel):
     stop_loss_percentage: float = Field(
         default_factory=lambda: float(os.getenv("STOP_LOSS_PERCENTAGE", "2.0"))
     )
-
 
 class AlertConfig(BaseModel):
     """Alert and notification configuration."""

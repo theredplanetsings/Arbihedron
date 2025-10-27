@@ -6,7 +6,7 @@ Arbihedron supports 100+ exchanges through CCXT. However, some exchanges have ge
 
 ## Recommended Exchanges
 
-### For Testing (No Geo-Restrictions)
+### For Testing (No Geographic Restrictions)
 
 | Exchange | Testnet? | API Key Needed? | Notes |
 |----------|----------|-----------------|-------|
@@ -26,7 +26,7 @@ Arbihedron supports 100+ exchanges through CCXT. However, some exchanges have ge
 | **KuCoin** | 0.1% | Medium | 30/sec |
 | **Bitfinex** | 0.2% | High | 90/min |
 
-## Current Issue: Binance Geo-Restriction
+## Current Issue: Binance Geographic Restriction
 
 You're seeing this error:
 ```
@@ -35,23 +35,20 @@ Service unavailable from a restricted location according to 'b. Eligibility'
 
 ### Solutions:
 
-#### Option 1: Use Kraken (Recommended for Testing)
+#### Option 1: Use Kraken (Recommended)
 ```bash
-# Edit .env
 EXCHANGE_NAME=kraken
 ENABLE_PAPER_TRADING=true
 ```
 
 #### Option 2: Use Coinbase
 ```bash
-# Edit .env
 EXCHANGE_NAME=coinbase
 ENABLE_PAPER_TRADING=true
 ```
 
 #### Option 3: Use KuCoin
 ```bash
-# Edit .env
 EXCHANGE_NAME=kucoin
 ENABLE_PAPER_TRADING=true
 ```
@@ -70,14 +67,12 @@ ENABLE_PAPER_TRADING=true
 ### Kraken
 ```bash
 EXCHANGE_NAME=kraken
-# No API key needed for market data
 ```
 
 **Pros:**
-- No geo-restrictions
-- Good for testing
+- No geographic restrictions
 - High liquidity
-- Works without API keys (public data)
+- Works without API keys
 
 **Cons:**
 - No testnet
@@ -86,34 +81,20 @@ EXCHANGE_NAME=kraken
 ### Coinbase / Coinbase Pro
 ```bash
 EXCHANGE_NAME=coinbase
-# or
-EXCHANGE_NAME=coinbasepro
 ```
 
-**Pros:**
-- US-friendly
-- Regulated
-- Good liquidity
-- Works without API keys
+**Pros:** US-friendly, regulated, good liquidity
 
-**Cons:**
-- Higher fees (0.5%)
-- Stricter rate limits
+**Cons:** Higher fees (0.5%), stricter rate limits
 
 ### KuCoin
 ```bash
 EXCHANGE_NAME=kucoin
 ```
 
-**Pros:**
-- Has testnet
-- Wide coin selection
-- Lower fees
-- Works without API keys
+**Pros:** Has testnet, wide coin selection, lower fees
 
-**Cons:**
-- Lower liquidity than Binance
-- More complex API
+**Cons:** Lower liquidity, more complex API
 
 ### Binance (If Accessible)
 ```bash
@@ -122,15 +103,9 @@ API_KEY=your_key
 API_SECRET=your_secret
 ```
 
-**Pros:**
-- Highest liquidity
-- Lowest fees (0.1%)
-- Most trading pairs
-- Has testnet
+**Pros:** Highest liquidity, lowest fees (0.1%), most trading pairs
 
-**Cons:**
-- Geo-restricted in some locations
-- Requires VPN in restricted areas
+**Cons:** Geographic restrictions, requires VPN in some areas
 
 ## Testing Without API Keys
 
@@ -192,14 +167,14 @@ Run with specific config:
 python main.py --config .env.kraken
 ```
 
-## API Key Setup (When Ready for Live Trading)
+## API Key Setup
 
 ### Getting API Keys
 
-1. **Binance**: Account → API Management → Create API
-2. **Kraken**: Settings → API → Generate New Key
-3. **Coinbase**: Settings → API → New API Key
-4. **KuCoin**: Account → API Management → Create API
+1. **Binance**: Account → API Management
+2. **Kraken**: Settings → API
+3. **Coinbase**: Settings → API
+4. **KuCoin**: Account → API Management
 
 ### Required Permissions
 
@@ -211,45 +186,32 @@ For arbitrage trading, you need:
 
 ### Security Best Practices
 
-1. **IP Whitelist** - Restrict API to your IP
-2. **2FA** - Enable two-factor authentication
-3. **Separate Keys** - Different keys for testing/production
-4. **Limited Permissions** - Only enable what you need
-5. **Regular Rotation** - Change keys periodically
+1. IP Whitelist - Restrict API to your IP
+2. Enable two-factor authentication
+3. Use separate keys for testing/production
+4. Only enable required permissions
+5. Rotate keys periodically
 
 ## Troubleshooting
 
 ### "Service unavailable from restricted location"
-**Solution:** Use Kraken, Coinbase, or KuCoin instead of Binance
+Use Kraken, Coinbase, or KuCoin instead
 
 ### "Invalid API key"
-**Solution:** 
-1. Check for spaces in .env file
-2. Regenerate keys
-3. Verify permissions
+Check for spaces in .env file, regenerate keys, verify permissions
 
 ### "Rate limit exceeded"
-**Solution:**
-```bash
-# In .env
-MAX_TRADES_PER_HOUR=50  # Reduce from 100
-```
+Reduce MAX_TRADES_PER_HOUR in .env
 
 ### "No trading pairs found"
-**Solution:**
-1. Exchange may be down
-2. Try different exchange
-3. Check exchange status page
+Exchange may be down, try different exchange
 
 ### "Insufficient balance"
-**Solution:**
-1. Use smaller position size
-2. Deposit more funds
-3. Stay in paper trading mode
+Use smaller position size or stay in paper trading mode
 
-## Quick Fix for Your Current Issue
+## Quick Fix
 
-**Right now, to get it working:**
+To resolve geographic restrictions:
 
 ```bash
 # Edit .env file
@@ -267,38 +229,23 @@ python test.py
 python examples.py
 ```
 
-You should see markets load successfully!
+Markets should load successfully.
 
 ## Exchange Comparison
 
 | Feature | Binance | Kraken | Coinbase | KuCoin |
 |---------|---------|--------|----------|--------|
-| Geo-Restrictions | Yes | No | No | No |
+| Geographic Restrictions | Yes | No | No | No |
 | Testnet | Yes | No | No | Yes |
-| No-API Testing | Yes | Yes | Yes | Yes |
 | Liquidity | Very High | High | High | Medium |
 | Fees | 0.1% | 0.16% | 0.5% | 0.1% |
 | Best For | High-volume | Testing | US traders | Variety |
 
-## Recommended: Multi-Exchange Strategy
+## Multi-Exchange Strategy
 
-For best results, monitor multiple exchanges:
+Monitor multiple exchanges to increase arbitrage opportunities:
 
 ```python
-# In config.py (advanced)
+# In config.py
 exchanges = ['kraken', 'coinbase', 'kucoin']
 ```
-
-This increases your chances of finding arbitrage opportunities!
-
-## Next Steps
-
-1. Change `EXCHANGE_NAME=kraken` in `.env`
-2. Run `python test.py` again
-3. Run `python examples.py` to see opportunities
-4. Once working, try other exchanges
-5. When ready for live trading, get API keys
-
----
-
-**TL;DR: Change to Kraken to fix the geo-restriction issue!**
