@@ -1,0 +1,188 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Main Arbihedron service
+  # ============================================
+  arbihedron:
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile
+    container_name: arbihedron
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ENABLE_PAPER_TRADING=true
+      - DATABASE_PATH=/app/data/arbihedron.db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./models:/app/models
+    ports:
+      - "8000:8000"
+    networks:
+      - arbihedron-network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================
+  # GNN-enabled service
+  # ============================================
+  arbihedron-gnn:
+    build:
+      context: .
+      target: gnn
+      dockerfile: Dockerfile
+    container_name: arbihedron-gnn
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - USE_GNN_ENGINE=true
+      - ENABLE_PAPER_TRADING=true
+      - DATABASE_PATH=/app/data/arbihedron.db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./models:/app/models
+    ports:
+      - "8001:8000"
+    networks:
+      - arbihedron-network
+    depends_on:
+      - redis
+    profiles:
+      - gnn
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================
+  # Redis for caching
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: arbihedron-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - arbihedron-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # ============================================
+  # Development service (with hot reload)
+  # ============================================
+  arbihedron-dev:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: arbihedron-dev
+    env_file:
+      - .env
+    environment:
+      - ENABLE_PAPER_TRADING=true
+      - DATABASE_PATH=/app/data/arbihedron.db
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Debug port
+    networks:
+      - arbihedron-network
+    depends_on:
+      - redis
+    profiles:
+      - dev
+    command: python main.py
+    stdin_open: true
+    tty: true
+
+  # ============================================
+  # Monitoring service (optional)
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: arbihedron-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - arbihedron-network
+    profiles:
+      - monitoring
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: arbihedron-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - arbihedron-network
+    profiles:
+      - monitoring
+    depends_on:
+      - prometheus
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  arbihedron-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:

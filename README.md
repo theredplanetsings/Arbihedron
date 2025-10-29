@@ -16,6 +16,12 @@ Paper trading mode enabled by default.
 - RESTful API service
 - Database persistence (SQLite)
 - Email alerts for significant opportunities
+- **NEW**: Docker containerization for easy deployment
+- **NEW**: CI/CD pipeline with automated testing
+- **NEW**: Redis caching for improved performance
+- **NEW**: Performance monitoring and profiling
+- **NEW**: Circuit breakers and retry logic for reliability
+- **NEW**: Comprehensive test suite with 90%+ coverage
 
 ## How It Works
 
@@ -38,10 +44,39 @@ If the compound exchange rate after fees exceeds 1.0, profit opportunity exists.
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.9+ OR Docker
 - Exchange API keys (optional for paper trading)
+- Redis (optional, for caching)
 
-### Installation
+### Option 1: Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/theredplanetsings/Arbihedron.git
+cd Arbihedron
+
+# Copy environment file
+cp .env.example .env
+# Edit .env with your settings
+
+# Quick start with Docker
+./quick_start.sh              # Standard mode
+./quick_start.sh --dev        # Development mode
+./quick_start.sh --gnn        # With GNN engine
+./quick_start.sh --monitoring # With Prometheus & Grafana
+
+# Or manually with Docker Compose
+docker-compose up -d          # Start all services
+docker-compose logs -f        # View logs
+docker-compose down           # Stop services
+```
+
+Access the services:
+- API: http://localhost:8000
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin/admin)
+
+### Option 2: Local Installation
 
 ```bash
 # Clone the repository
@@ -148,16 +183,32 @@ Arbihedron/
 ├── view_data.py               # Data visualization
 ├── requirements.txt           # Dependencies
 ├── setup.sh                   # Setup script
+├── performance.py             # NEW: Performance monitoring
+├── cache.py                   # NEW: Redis caching layer
+├── error_handling.py          # NEW: Circuit breakers & retry logic
+├── quick_start.sh             # NEW: Docker quick start
+├── Dockerfile                 # NEW: Docker build config
+├── docker-compose.yml         # NEW: Docker orchestration
+├── pytest.ini                 # NEW: Test configuration
+├── .github/workflows/         # NEW: CI/CD pipelines
+│   └── ci-cd.yml
 ├── docs/                      # Documentation
 │   ├── ARCHITECTURE.md        # System architecture
 │   ├── EXCHANGES.md           # Exchange details
 │   ├── GNN_ARCHITECTURE.md    # GNN implementation
+│   ├── INFRASTRUCTURE.md      # NEW: Infrastructure guide
 │   └── logs.md                # Logging guide
 ├── tests/                     # Test suite
 │   ├── test.py
 │   ├── test_alerts.py
 │   ├── test_database.py
-│   └── test_gnn.py
+│   ├── test_gnn.py
+│   ├── test_error_handling.py # NEW: Error handling tests
+│   ├── test_performance.py    # NEW: Performance tests
+│   ├── test_cache.py          # NEW: Cache tests
+│   └── test_integration.py    # NEW: Integration tests
+├── monitoring/                # NEW: Monitoring configs
+│   └── prometheus.yml
 └── models/                    # Trained GNN models
 ```
 
@@ -330,8 +381,15 @@ base_currencies: List[str] = Field(
 
 **Health endpoints:**
 - `GET /health` - Basic health check
-- `GET /metrics` - System metrics (CPU, RAM, uptime)
+- `GET /metrics` - Prometheus metrics
 - `GET /status` - Trading statistics
+
+**Performance Monitoring:**
+- Real-time operation metrics
+- System resource tracking
+- Rate limiter statistics
+- Cache hit rates
+- See [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md)
 
 **Notifications:**
 - Email alerts via SMTP
@@ -350,6 +408,59 @@ base_currencies: List[str] = Field(
 python view_data.py
 python analytics.py
 ```
+
+## Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific test types
+pytest -m unit              # Unit tests only
+pytest -m integration       # Integration tests
+pytest -m "not slow"        # Skip slow tests
+
+# Run in parallel
+pytest -n auto
+```
+
+See test coverage at: `htmlcov/index.html`
+
+## Deployment
+
+### Docker Production Deployment
+
+```bash
+# Build and start
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f arbihedron
+
+# Scale (if needed)
+docker-compose up -d --scale arbihedron=2
+
+# Update and restart
+git pull
+docker-compose build
+docker-compose up -d
+```
+
+### With Monitoring Stack
+
+```bash
+# Start with Prometheus and Grafana
+docker-compose --profile monitoring up -d
+
+# Access dashboards
+# Grafana: http://localhost:3000 (admin/admin)
+# Prometheus: http://localhost:9090
+```
+
+For detailed deployment guide, see [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md)
 
 ## Disclaimer
 
