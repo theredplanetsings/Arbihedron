@@ -51,7 +51,7 @@ class CacheManager:
             self.client.ping()
             logger.info(f"Connected to Redis at {host}:{port}")
             
-        except (redis.ConnectionError, redis.TimeoutError) as e:
+        except Exception as e:
             logger.error(f"Failed to connect to Redis: {e}")
             logger.warning("Continuing without cache")
             self.enabled = False

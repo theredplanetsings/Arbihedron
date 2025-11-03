@@ -2,11 +2,13 @@
 """Test alert notifications for Arbihedron."""
 import asyncio
 import sys
+import pytest
 from rich.console import Console
 from rich.panel import Panel
 from alerts import AlertManager
 from config import ALERT_CONFIG
 
+@pytest.mark.asyncio
 async def test_alert_system():
     """Test all alert channels."""
     console = Console()

@@ -75,19 +75,46 @@ class TestDatabaseIntegration:
         """Test complete session lifecycle in database."""
         from database import ArbihedronDatabase
         
+        from models import ArbitrageOpportunity, TriangularPath
+        from datetime import datetime
+        
         db = ArbihedronDatabase(":memory:")  # Use in-memory DB for testing
         
         # Create session
-        session_id = db.create_session("test_exchange", "kraken")
+        session_id = db.create_session("test_exchange", "kraken", {})
         assert session_id is not None
         
         # Record opportunity
-        opportunity_id = db.record_opportunity(
-            session_id=session_id,
-            path="BTC-ETH-USDT",
-            profit_percent=1.5,
-            amounts={'btc': 1.0, 'eth': 20.0, 'usdt': 50000},
+        from models import TradingPair, TradeDirection
+        
+        pair = TradingPair(
+            symbol="BTC/USDT", 
+            base="BTC",
+            quote="USDT",
+            bid=50000.0, 
+            ask=50001.0, 
+            bid_volume=1.0,
+            ask_volume=1.0,
+            timestamp=datetime.now()
         )
+        path = TriangularPath(
+            path=["BTC", "ETH", "USDT"],
+            pairs=[pair],
+            directions=[TradeDirection.BUY],
+            profit_percentage=1.5,
+            profit_amount=50.0,
+            start_amount=1000.0,
+            fees_total=5.0
+        )
+        opp = ArbitrageOpportunity(
+            path=path,
+            timestamp=datetime.now(),
+            expected_profit=50.0,
+            executable=True,
+            reason="test",
+            risk_score=0.5
+        )
+        opportunity_id = db.save_opportunity(session_id, opp)
         assert opportunity_id is not None
         
         # End session
@@ -96,7 +123,7 @@ class TestDatabaseIntegration:
         # Verify session stats
         stats = db.get_session_stats(session_id)
         assert stats is not None
-        assert stats['opportunity_count'] == 1
+        assert stats['total_opportunities'] == 1
 
 
 @pytest.mark.integration  

@@ -2,12 +2,41 @@
 """Quick test script for GNN arbitrage engine."""
 import asyncio
 import sys
+import pytest
+import pytest_asyncio
 from loguru import logger
 from rich.console import Console
 from rich.panel import Panel
 
 console = Console()
 
+@pytest_asyncio.fixture
+async def engine():
+    """Fixture to create GNN engine for tests."""
+    from config import config
+    from exchange_client import ExchangeClient
+    from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+    
+    exchange = ExchangeClient(config.exchange)
+    gnn_config = GNNConfig(
+        hidden_dim=64,
+        num_layers=2,
+        dropout=0.2,
+        profit_threshold=0.5
+    )
+    engine = GNNArbitrageEngine(
+        exchange_client=exchange,
+        config=config.trading,
+        gnn_config=gnn_config
+    )
+    await engine.initialize()
+    yield engine
+    try:
+        await engine.shutdown()
+    except:
+        pass
+
+@pytest.mark.asyncio
 async def test_gnn_imports():
     """Test that all GNN dependencies are available."""
     console.print(Panel.fit(" Testing GNN Imports", style="bold cyan"))
@@ -35,6 +64,7 @@ async def test_gnn_imports():
     
     return True
 
+@pytest.mark.asyncio
 async def test_gnn_initialization():
     """Test GNN engine initialization."""
     console.print("\n")
@@ -84,6 +114,7 @@ async def test_gnn_initialization():
         console.print(traceback.format_exc(), style="red dim")
         return None
 
+@pytest.mark.asyncio
 async def test_graph_construction(engine):
     """Test graph construction from market data."""
     console.print("\n")
@@ -114,12 +145,18 @@ async def test_graph_construction(engine):
         console.print(traceback.format_exc(), style="red dim")
         return None, None, None
 
-async def test_gnn_inference(engine, node_features, edge_index, edge_features):
+@pytest.mark.asyncio
+async def test_gnn_inference(engine):
     """Test GNN model inference."""
     console.print("\n")
     console.print(Panel.fit(" Testing GNN Inference", style="bold cyan"))
     
     try:
+        # Fetch and build graph first
+        symbols = list(engine.exchange.markets.keys())[:10]
+        trading_pairs = await engine.exchange.fetch_tickers_batch(symbols)
+        node_features, edge_index, edge_features = engine._build_graph_from_snapshot(trading_pairs)
+        
         if node_features is None:
             console.print("X No graph data available", style="red")
             return False
@@ -150,6 +187,7 @@ async def test_gnn_inference(engine, node_features, edge_index, edge_features):
         console.print(traceback.format_exc(), style="red dim")
         return False
 
+@pytest.mark.asyncio
 async def test_cycle_detection(engine):
     """Test arbitrage cycle detection."""
     console.print("\n")
