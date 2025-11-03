@@ -244,13 +244,6 @@ class ArbihedronBot:
         # closes the exchange connection properly
         self.exchange.close()
         
-        # ends the database session
-        if self.session_id:
-            try:
-                self.db.end_session(self.session_id)
-            except Exception as e:
-                logger.debug(f"Could not end session (database may already be closed): {e}")
-        
         # shows the final stats
         stats = self.executor.get_statistics()
         
@@ -259,22 +252,32 @@ class ArbihedronBot:
         self.console.print(f"Successful: {stats['successful_trades']}")
         self.console.print(f"Total Profit: ${stats['total_profit']:.2f}")
         
-        # exports all the data to CSV
-        try:
-            export_path = self.db.export_to_csv()
-            self.console.print(f"\n[green]Data exported to: {export_path}[/]")
-            
-            # also exports the session report
-            report_path = self.db.export_session_report(self.session_id)
-            self.console.print(f"[green]Session report: {report_path}[/]")
-        except Exception as e:
-            logger.error(f"Failed to export data: {e}")
+        # exports all the data to CSV BEFORE ending session
+        if self.session_id:
+            try:
+                export_path = self.db.export_to_csv()
+                self.console.print(f"\n[green]Data exported to: {export_path}[/]")
+                
+                # also exports the session report
+                report_path = self.db.export_session_report(self.session_id)
+                self.console.print(f"[green]Session report: {report_path}[/]")
+            except Exception as e:
+                logger.error(f"Failed to export data: {e}")
         
-        # closes database
+        # ends the database session AFTER export
+        if self.session_id:
+            try:
+                self.db.end_session(self.session_id)
+                logger.info("Session ended successfully")
+            except Exception as e:
+                logger.warning(f"Could not end session: {e}")
+        
+        # closes database last
         try:
             self.db.close()
+            logger.info("Database closed successfully")
         except Exception as e:
-            logger.debug(f"Database already closed: {e}")
+            logger.warning(f"Error closing database: {e}")
         
         logger.success("Shutdown complete")
 
