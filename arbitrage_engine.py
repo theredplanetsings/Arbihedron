@@ -38,7 +38,7 @@ class ArbitrageEngine:
     
     def _discover_triangular_paths(self):
         """Discover all possible triangular arbitrage paths."""
-        # gets all available trading pairs
+        # get all available trading pairs
         available_pairs = set()
         currency_graph: Dict[str, Set[str]] = {}
         
@@ -76,7 +76,7 @@ class ArbitrageEngine:
                     if end_currency == start_currency or end_currency == mid_currency:
                         continue
                     
-                    # checks if we can get back to where we started
+                    # check if we can get back to where we started
                     if start_currency in currency_graph.get(end_currency, set()):
                         path = (start_currency, mid_currency, end_currency, start_currency)
                         paths.add(path)
@@ -179,7 +179,7 @@ class ArbitrageEngine:
         # updates our map with fresh data
         self.trading_pairs_map = {pair.symbol: pair for pair in trading_pairs}
         
-        # checks each path for profitable opportunities
+        # check each path for profitable opportunities
         opportunities = []
         
         for path in self.triangular_paths:
@@ -192,7 +192,7 @@ class ArbitrageEngine:
                 # figures out how risky this looks
                 risk_score = self._calculate_risk_score(triangular_path)
                 
-                # checks if it's worth executing
+                # check if it's worth executing
                 executable = triangular_path.profit_percentage >= config.trading.min_profit_threshold
                 
                 opportunity = ArbitrageOpportunity(

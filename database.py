@@ -229,7 +229,7 @@ class ArbihedronDatabase:
         if not session:
             return {}
         
-        # gets the execution success rate
+        # get the execution success rate
         cursor.execute("""
             SELECT 
                 COUNT(*) as total,
@@ -314,7 +314,7 @@ class ArbihedronDatabase:
         
         stats = self.get_session_stats(session_id)
         
-        # gets the top opportunities
+        # get the top opportunities
         cursor = self.conn.cursor()
         cursor.execute("""
             SELECT * FROM opportunities 
@@ -324,7 +324,7 @@ class ArbihedronDatabase:
         """, (session_id,))
         top_opps = [dict(row) for row in cursor.fetchall()]
         
-        # gets all the executions
+        # get all the executions
         cursor.execute("""
             SELECT * FROM executions 
             WHERE session_id = ?

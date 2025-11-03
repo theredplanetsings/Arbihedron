@@ -100,7 +100,7 @@ if [ "$REBUILD" = true ]; then
 fi
 
 # Start appropriate services
-echo "🚀 Starting Arbihedron in $MODE mode..."
+echo " Starting Arbihedron in $MODE mode..."
 echo ""
 
 case $MODE in
@@ -143,7 +143,7 @@ sleep 5
 
 # Check service health
 echo ""
-echo "📊 Service Status:"
+echo " Service Status:"
 docker-compose ps
 
 echo ""

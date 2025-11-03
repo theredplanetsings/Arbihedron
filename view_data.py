@@ -85,7 +85,7 @@ def show_session_details(db: ArbihedronDatabase, session_id: int):
     
     console.print(stats_table)
     
-    # Gets the top opportunities
+    # Get the top opportunities
     cursor = db.conn.cursor()
     cursor.execute("""
         SELECT path, profit_percentage, expected_profit, executable

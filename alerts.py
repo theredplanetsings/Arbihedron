@@ -83,7 +83,7 @@ class AlertManager:
         if force:
             return True
             
-        # checks during quiet hours
+        # check during quiet hours
         if self._is_quiet_hours():
             logger.info("Skipping alert during quiet hours")
             return False
@@ -93,7 +93,7 @@ class AlertManager:
             self.alert_count = 0
             self.alert_reset_time = datetime.now()
             
-        # checks the rate limit
+        # check the rate limit
         if self.alert_count >= self.config.max_alerts_per_hour:
             logger.warning("Alert rate limit exceeded")
             return False
@@ -304,7 +304,7 @@ class AlertManager:
         color = "good" if success else "danger"
         
         await self.send_alert(
-            f"🔄 Execution {status}",
+            f" Execution {status}",
             f"Trade execution completed with {status.lower()}",
             details={
                 "Path": path,

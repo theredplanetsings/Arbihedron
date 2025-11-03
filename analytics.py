@@ -43,14 +43,14 @@ class ArbihedronAnalytics:
         """)
         exec_stats = dict(cursor.fetchone())
         
-        # calculates the success rate
+        # calculate the success rate
         if exec_stats['total_executions']:
             success_rate = (exec_stats['successful_executions'] / 
                           exec_stats['total_executions'] * 100)
         else:
             success_rate = 0
         
-        # calculates the runtime
+        # calculate the runtime
         if session_stats['first_session'] and session_stats['last_session']:
             first = datetime.fromisoformat(session_stats['first_session'])
             last = datetime.fromisoformat(session_stats['last_session'])
@@ -202,7 +202,7 @@ class ArbihedronAnalytics:
         """Calculate key performance metrics."""
         overall = self.get_overall_stats()
         
-        # calculates the additional metrics
+        # calculate the additional metrics
         if overall['total_opportunities'] > 0:
             executable_rate = (overall['total_executions'] / 
                              overall['total_opportunities'] * 100)

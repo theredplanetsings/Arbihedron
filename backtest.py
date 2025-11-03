@@ -26,7 +26,7 @@ class ArbitrageBacktest:
         initial_capital: float = 10000.0
     ) -> Dict:
         """Run backtest on historical data."""
-        # sets up components if we haven't already
+        # set up components if we haven't already
         if self.engine is None:
             from exchange_client import ExchangeClient
             from arbitrage_engine import ArbitrageEngine

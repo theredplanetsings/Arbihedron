@@ -17,9 +17,9 @@ async def main():
     console.print(Panel.fit("  GNN vs Traditional Arbitrage Detection", style="bold magenta"))
     console.print()
     
-    # initialises exchange
+    # initialise exchange
     exchange = ExchangeClient(config.exchange)
-    console.print("🔄 Initializing engines...", style="cyan")
+    console.print(" Initializing engines...", style="cyan")
     
     # our traditional engine
     traditional_engine = ArbitrageEngine(exchange, config.trading)
@@ -32,7 +32,7 @@ async def main():
         exchange, 
         config.trading, 
         gnn_config,
-        model_path="models/gnn_arbitrage_best.pth"  # loads the trained model
+        model_path="models/gnn_arbitrage_best.pth"  # load the trained model
     )
     await gnn_engine.initialize()
     console.print("OK GNN engine ready (trained model loaded)", style="green")
@@ -51,7 +51,7 @@ async def main():
     gnn_snapshot = await gnn_engine.scan_opportunities()
     gnn_time = (datetime.now() - gnn_start).total_seconds()
     
-    # creates comparison table
+    # create comparison table
     table = Table(title="  Performance Comparison", show_header=True, header_style="bold magenta")
     table.add_column("Metric", style="cyan", width=30)
     table.add_column("Traditional", justify="right", style="yellow")

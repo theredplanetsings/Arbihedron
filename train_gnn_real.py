@@ -38,7 +38,7 @@ class RealDataGNNTrainer:
         self.training_samples = []
         self.validation_split = 0.2
         
-        # initialises optimiser
+        # initialise optimiser
         self.optimizer = torch.optim.Adam(
             self.gnn_engine.model.parameters(),
             lr=0.001
@@ -87,7 +87,7 @@ class RealDataGNNTrainer:
                         node_features, edge_index, edge_features = \
                             self.gnn_engine._build_graph_from_snapshot(snapshot.pairs)
                         
-                        # creates our labels: mark edges involved in profitable paths
+                        # create our labels: mark edges involved in profitable paths
                         profits = torch.zeros(edge_index.shape[1])
                         
                         for opp in snapshot.opportunities:
@@ -315,7 +315,7 @@ async def main():
     console.print("[bold cyan] GNN Training on Real Market Data[/bold cyan]")
     console.print()
     
-    # initialises components
+    # initialise components
     logger.info(" Initializing engines...")
     exchange = ExchangeClient(config.exchange)
     db = ArbihedronDatabase()  # Uses default path "data/arbihedron.db"
@@ -333,7 +333,7 @@ async def main():
     
     console.print()
     
-    # creates the trainer
+    # create the trainer
     trainer = RealDataGNNTrainer(traditional_engine, gnn_engine, db)
     
     # collects real data

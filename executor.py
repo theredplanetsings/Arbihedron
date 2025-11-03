@@ -119,7 +119,7 @@ class TradeExecutor:
                 
                 logger.info(f"After step {i+1}: {current_amount:.4f}")
             
-            # checks how much we actually made
+            # check how much we actually made
             actual_profit = current_amount - opportunity.path.start_amount
             slippage = (
                 (actual_profit - opportunity.expected_profit) / 
@@ -138,7 +138,7 @@ class TradeExecutor:
             slippage = 0.0
             logger.error(f"Execution failed: {e}")
         
-        # creates an execution record
+        # create an execution record
         execution = TradeExecution(
             opportunity=opportunity,
             executed_at=execution_start,

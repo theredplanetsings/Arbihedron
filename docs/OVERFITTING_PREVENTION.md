@@ -61,7 +61,7 @@ self.path_predictor = nn.Sequential(
 
 ---
 
-## 2. 📊 **Train/Validation Split**
+## 2.  **Train/Validation Split**
 
 ### Location: `train_gnn_real.py`
 
@@ -187,7 +187,7 @@ loss = class_loss + 0.1 * regression_loss  # ← Regression weighted 10%
 
 ---
 
-## 6. 🔄 **Data Collection from Real Markets**
+## 6.  **Data Collection from Real Markets**
 
 ### Location: `train_gnn_real.py`
 
@@ -279,7 +279,7 @@ GATConv(
 
 ---
 
-## 10. 📊 **Validation During Training**
+## 10.  **Validation During Training**
 
 ### Location: `train_gnn_real.py`
 

@@ -28,7 +28,7 @@ class ArbihedronService:
         self.last_health_check = time.time()
         self.health_check_interval = 60  # 1 minute
         
-        # sets up service logging
+        # set up service logging
         log_path = Path("logs/service")
         log_path.mkdir(parents=True, exist_ok=True)
         
@@ -40,7 +40,7 @@ class ArbihedronService:
             format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
         )
         
-        # sets up signal handlers
+        # set up signal handlers
         signal.signal(signal.SIGTERM, self._handle_shutdown)
         signal.signal(signal.SIGINT, self._handle_shutdown)
         
@@ -61,7 +61,7 @@ class ArbihedronService:
             if now - t < self.restart_window
         ]
         
-        # checks if we've exceeded max restarts in the window
+        # check if we've exceeded max restarts in the window
         if len(self.restart_times) >= self.max_restarts:
             logger.error(
                 f"Exceeded {self.max_restarts} restarts in "
@@ -81,7 +81,7 @@ class ArbihedronService:
         try:
             logger.info("Starting Arbihedron bot...")
             
-            # initialises alert manager
+            # initialise alert manager
             if ALERT_CONFIG.email_enabled or ALERT_CONFIG.slack_enabled:
                 self.alert_manager = AlertManager(ALERT_CONFIG)
                 await self.alert_manager.initialize()
@@ -90,7 +90,7 @@ class ArbihedronService:
                 # sends a startup alert
                 await self.alert_manager.alert_startup(version="1.0")
             
-            # initialises health monitor
+            # initialise health monitor
             if HEALTH_CONFIG.enabled:
                 self.health_monitor = HealthMonitor(
                     port=HEALTH_CONFIG.port,
@@ -99,7 +99,7 @@ class ArbihedronService:
                 await self.health_monitor.initialize()
                 logger.info(f"Health monitor started on port {HEALTH_CONFIG.port}")
             
-            # initialises and run bot
+            # initialise and run bot
             self.bot = ArbihedronBot()
             
             # passes in monitoring components to bot

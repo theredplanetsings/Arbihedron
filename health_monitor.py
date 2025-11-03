@@ -90,7 +90,7 @@ class HealthMonitor:
         
     async def start(self):
         """Initialise health monitor and start HTTP server."""
-        # sets up HTTP app
+        # set up HTTP app
         self.app = web.Application()
         self.app.router.add_get('/health', self.health_check_handler)
         self.app.router.add_get('/metrics', self.metrics_handler)
@@ -140,7 +140,7 @@ class HealthMonitor:
             self.metrics.memory_usage_mb = self.process.memory_info().rss / 1024 / 1024
             self.metrics.cpu_percent = self.process.cpu_percent(interval=0.1)
             
-            # calculates the error rate
+            # calculate the error rate
             total_ops = self.metrics.total_opportunities + self.metrics.total_executions
             if total_ops > 0:
                 self.metrics.error_rate = self.metrics.total_errors / total_ops
@@ -155,21 +155,21 @@ class HealthMonitor:
         issues = []
         severity = "warning"
         
-        # checks error rate
+        # check error rate
         if self.metrics.error_rate > self.max_error_rate:
             issues.append(f"High error rate: {self.metrics.error_rate:.1%}")
             severity = "critical"
             
-        # checks memory usage
+        # check memory usage
         if self.metrics.memory_usage_mb > self.max_memory_mb:
             issues.append(f"High memory usage: {self.metrics.memory_usage_mb:.0f}MB")
             severity = "critical"
             
-        # checks CPU usage
+        # check CPU usage
         if self.metrics.cpu_percent > self.max_cpu_percent:
             issues.append(f"High CPU usage: {self.metrics.cpu_percent:.0f}%")
             
-        # checks activity
+        # check activity
         if self.metrics.last_activity:
             inactive_minutes = (datetime.now() - self.metrics.last_activity).total_seconds() / 60
             if inactive_minutes > self.max_inactive_minutes:

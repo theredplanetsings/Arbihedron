@@ -270,7 +270,7 @@ class ArbitrageGNN(nn.Module):
                     if mid2 == start_node or mid2 == mid1:
                         continue
                     
-                    # checks if we can get back to start
+                    # check if we can get back to start
                     for end, edge3_idx, score3, profit3 in adj_list[mid2]:
                         if end == start_node:
                             # we found a triangular cycle!
@@ -329,12 +329,12 @@ class GNNArbitrageEngine:
         self.historical_rates: Dict[str, List[float]] = {}
         self.historical_values: Dict[str, List[float]] = {}
         
-        # initialises the model (will be created after seeing data dimensions)
+        # initialise the model (will be created after seeing data dimensions)
         self.model: Optional[ArbitrageGNN] = None
         self.graph_encoder = None
         self.optimizer = None
         
-        # loads the pre-trained model if path provided
+        # load the pre-trained model if path provided
         if model_path:
             self.load_model(model_path)
             
@@ -395,7 +395,7 @@ class GNNArbitrageEngine:
             except ValueError:
                 continue
         
-        # creates the bidirectional mapping
+        # create the bidirectional mapping
         for idx, currency in enumerate(sorted(currencies)):
             self.currency_map[currency] = idx
             self.reverse_currency_map[idx] = currency
@@ -465,7 +465,7 @@ class GNNArbitrageEngine:
                 edge_features_list.append(edge_feat)
                 
                 # adds reverse edge (quote -> base using BID price)
-                # creates inverted features for the reverse direction
+                # create inverted features for the reverse direction
                 reverse_feat = edge_feat.clone()
                 # swa[s] bid/ask for reverse direction
                 reverse_feat[0], reverse_feat[1] = edge_feat[1], edge_feat[0]  # Swap log(bid) and log(ask)

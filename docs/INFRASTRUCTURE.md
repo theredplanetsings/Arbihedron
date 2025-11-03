@@ -50,7 +50,7 @@ docker-compose up -d
 - Grafana: http://localhost:3000 (admin/admin)
 - Redis: localhost:6379
 
-## 🔄 CI/CD Pipeline
+##  CI/CD Pipeline
 
 ### GitHub Actions Workflows
 
@@ -93,7 +93,7 @@ Configure these in GitHub repository settings:
 - Optional: `SLACK_WEBHOOK` for notifications
 - Optional: `CODECOV_TOKEN` for coverage reporting
 
-## 📊 Performance Monitoring
+##  Performance Monitoring
 
 ### PerformanceMonitor
 
@@ -197,7 +197,7 @@ orderbook_key = CacheKeys.orderbook("kraken", "ETH/BTC")
 opportunity_key = CacheKeys.opportunity("binance", "BTC-ETH-USDT")
 ```
 
-## 🛡️ Error Handling
+##  Error Handling
 
 ### Circuit Breaker
 
@@ -343,7 +343,7 @@ After running tests with coverage:
 - HTML: `htmlcov/index.html`
 - XML: `coverage.xml` (for CI/CD)
 
-## 📈 Monitoring & Observability
+##  Monitoring & Observability
 
 ### Prometheus Metrics
 
@@ -390,7 +390,7 @@ logger.warning("Rate limit approaching", current=8, max=10)
 logger.error("API call failed", error=str(e), retry_count=3)
 ```
 
-## 🚀 Performance Optimization Tips
+##  Performance Optimization Tips
 
 1. **Enable Redis Caching**
    ```bash
@@ -425,7 +425,7 @@ logger.error("API call failed", error=str(e), retry_count=3)
    )
    ```
 
-## 🔧 Configuration
+##  Configuration
 
 Add to `.env`:
 
@@ -464,7 +464,7 @@ METRICS_ENABLED=true
 9. **Review performance metrics regularly**
 10. **Keep dependencies updated and secure**
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Docker Issues
 

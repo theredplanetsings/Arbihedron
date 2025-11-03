@@ -27,7 +27,7 @@ class ArbihedronBot:
         """Initialise the bot."""
         self.config = config
         
-        # initialises the database for persistence
+        # initialise the database for persistence
         self.db = ArbihedronDatabase()
         self.session_id = None
         
@@ -35,7 +35,7 @@ class ArbihedronBot:
         self.alert_manager = None
         self.health_monitor = None
         
-        # gets all the main components set up
+        # get all the main components set up
         self.exchange = ExchangeClient(config.exchange)
         
         # Choose between traditional and GNN engine
@@ -45,7 +45,7 @@ class ArbihedronBot:
                 logger.error("Install with: pip install torch torch-geometric")
                 raise RuntimeError("GNN mode unavailable")
             
-            logger.info("🧠 Using GNN-based arbitrage detection")
+            logger.info(" Using GNN-based arbitrage detection")
             gnn_config = GNNConfig(
                 profit_threshold=config.trading.min_profit_threshold
             )
@@ -56,7 +56,7 @@ class ArbihedronBot:
                 model_path=config.trading.gnn_model_path if config.trading.gnn_model_path else None
             )
         else:
-            logger.info("🔍 Using traditional exhaustive search")
+            logger.info(" Using traditional exhaustive search")
             self.engine = ArbitrageEngine(self.exchange, config.trading)
         
         self.executor = TradeExecutor(self.exchange, config.risk, self.db)
@@ -91,7 +91,7 @@ class ArbihedronBot:
             logger.info(f"Min Profit Threshold: {config.trading.min_profit_threshold}%")
             logger.info(f"Max Position Size: ${config.trading.max_position_size}")
             
-            # creates a new session in the database
+            # create a new session in the database
             session_config = {
                 'min_profit_threshold': config.trading.min_profit_threshold,
                 'max_position_size': config.trading.max_position_size,
@@ -116,7 +116,7 @@ class ArbihedronBot:
     
     async def scan_and_execute_loop(self):
         """Main loop: scan for opportunities and execute."""
-        scan_interval = 1.0  # checks for opportunities every second
+        scan_interval = 1.0  # check for opportunities every second
         
         while self.running:
             try:
@@ -220,7 +220,7 @@ class ArbihedronBot:
         self.running = True
         
         try:
-            # gets everything started
+            # get everything started
             await self.initialize()
             
             # runs both the scanning and display at the same time
@@ -285,7 +285,7 @@ async def main():
     """Main entry point."""
     bot = ArbihedronBot()
     
-    # handles ctrl+c and kill signals gracefully
+    # handle ctrl+c and kill signals gracefully
     loop = asyncio.get_event_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(
