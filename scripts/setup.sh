@@ -144,10 +144,10 @@ if [ "$INSTALL_GNN" = true ]; then
 fi
 
 echo "Service control:"
-echo "   ./arbi start     # Start as background service"
-echo "   ./arbi status    # Check status"
-echo "   ./arbi logs      # View logs"
-echo "   ./arbi stop      # Stop service"
+echo "   scripts/arbi start     # Start as background service"
+echo "   scripts/arbi status    # Check status"
+echo "   scripts/arbi logs      # View logs"
+echo "   scripts/arbi stop      # Stop service"
 echo ""
 echo "⚠️  Important: Keep paper trading enabled for testing!"
 echo "   ENABLE_PAPER_TRADING=true in .env"

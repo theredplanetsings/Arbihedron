@@ -6,11 +6,12 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SERVICE_NAME="com.arbihedron.bot"
 PLIST_FILE="$HOME/Library/LaunchAgents/$SERVICE_NAME.plist"
-PYTHON_SCRIPT="$SCRIPT_DIR/arbihedron_service.py"
-LOG_FILE="$SCRIPT_DIR/logs/service/current.log"
-PID_FILE="$SCRIPT_DIR/arbihedron.pid"
+PYTHON_SCRIPT="$PROJECT_DIR/arbihedron_service.py"
+LOG_FILE="$PROJECT_DIR/logs/service/current.log"
+PID_FILE="$PROJECT_DIR/arbihedron.pid"
 
 # Colors for output
 RED='\033[0;31m'
@@ -88,14 +89,14 @@ start_service() {
         
         if is_running; then
             print_success "Service started successfully"
-            print_info "View logs: ./arbi logs"
+            print_info "View logs: scripts/arbi logs"
             return 0
         fi
     fi
     
     # Fallback: run directly in background
     print_info "Starting service directly..."
-    cd "$SCRIPT_DIR"
+    cd "$PROJECT_DIR"
     nohup $PYTHON_CMD "$PYTHON_SCRIPT" > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
     sleep 2
@@ -500,7 +501,7 @@ case "${1:-}" in
     *)
         echo "Arbihedron Service Control"
         echo ""
-        echo "Usage: ./arbi {start|stop|restart|status|logs|install|uninstall|report|test-alerts|config-alerts|health}"
+        echo "Usage: scripts/arbi {start|stop|restart|status|logs|install|uninstall|report|test-alerts|config-alerts|health}"
         echo ""
         echo "Commands:"
         echo "  start            - Start the service"
@@ -516,13 +517,13 @@ case "${1:-}" in
         echo "  health           - Show health status (if service is running)"
         echo ""
         echo "Examples:"
-        echo "  ./arbi start          # Start the bot"
-        echo "  ./arbi status         # Check if running"
-        echo "  ./arbi logs -f        # Follow logs in real-time"
-        echo "  ./arbi report html    # Generate HTML report"
-        echo "  ./arbi report all     # Generate all reports"
-        echo "  ./arbi test-alerts    # Test notification system"
-        echo "  ./arbi health         # View health metrics"
+        echo "  scripts/arbi start          # Start the bot"
+        echo "  scripts/arbi status         # Check if running"
+        echo "  scripts/arbi logs -f        # Follow logs in real-time"
+        echo "  scripts/arbi report html    # Generate HTML report"
+        echo "  scripts/arbi report all     # Generate all reports"
+        echo "  scripts/arbi test-alerts    # Test notification system"
+        echo "  scripts/arbi health         # View health metrics"
         exit 1
         ;;
 esac

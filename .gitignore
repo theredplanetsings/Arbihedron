@@ -45,22 +45,33 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Trading data
+# Trading data and exports (don't commit trading data)
 backtest_results/
 trade_history/
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+exports/*.csv
+exports/*.json
+exports/test/
 
-# Database and exports (don't commit trading data)
-data/
-exports/
+# Database files
 *.db
 *.sqlite
 *.sqlite3
 
 # Test outputs
+.pytest_cache/
+.coverage
+.benchmarks/
+htmlcov/
+coverage.xml
 test_*.db
 
 # Service files
 *.pid
 arbihedron.pid
-*.csv
-*.db
+
+# Models (large binary files)
+models/*.pth
+models/*.png

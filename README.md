@@ -60,10 +60,10 @@ cp .env.example .env
 # Edit .env with your settings
 
 # Quick start with Docker
-./quick_start.sh              # Standard mode
-./quick_start.sh --dev        # Development mode
-./quick_start.sh --gnn        # With GNN engine
-./quick_start.sh --monitoring # With Prometheus & Grafana
+scripts/quick_start.sh              # Standard mode
+scripts/quick_start.sh --dev        # Development mode
+scripts/quick_start.sh --gnn        # With GNN engine
+scripts/quick_start.sh --monitoring # With Prometheus & Grafana
 
 # Or manually with Docker Compose
 docker-compose up -d          # Start all services
@@ -84,9 +84,9 @@ git clone https://github.com/theredplanetsings/Arbihedron.git
 cd Arbihedron
 
 # Run setup script
-./setup.sh              # Basic installation
-./setup.sh --gnn        # Include GNN dependencies
-./setup.sh --full       # Complete installation with all features
+scripts/setup.sh              # Basic installation
+scripts/setup.sh --gnn        # Include GNN dependencies
+scripts/setup.sh --full       # Complete installation with all features
 ```
 
 ### Configuration
@@ -134,10 +134,10 @@ python backtest.py
 
 **Service mode with auto-restart:**
 ```bash
-./arbi start      # Start as background service
-./arbi status     # Check service status
-./arbi logs       # View logs
-./arbi stop       # Stop service
+scripts/arbi start      # Start as background service
+scripts/arbi status     # Check service status
+scripts/arbi logs       # View logs
+scripts/arbi stop       # Stop service
 ```
 
 **Health monitoring:**
@@ -177,21 +177,24 @@ Arbihedron/
 ├── alerts.py                  # Email/Slack notifications
 ├── health_monitor.py          # HTTP health endpoints
 ├── arbihedron_service.py      # Service wrapper with auto-restart
-├── arbi                       # Service control script
 ├── utils.py                   # Utility functions
 ├── examples.py                # Usage examples
 ├── view_data.py               # Data visualization
 ├── requirements.txt           # Dependencies
-├── setup.sh                   # Setup script
 ├── performance.py             # Performance monitoring
 ├── cache.py                   # Redis caching layer
 ├── error_handling.py          # Circuit breakers & retry logic
-├── quick_start.sh             # Docker quick start
 ├── Dockerfile                 # Docker build config
 ├── docker-compose.yml         # Docker orchestration
-├── pytest.ini                 # Test configuration
+├── pyproject.toml             # Python project configuration
 ├── .github/workflows/         # CI/CD pipelines
 │   └── ci-cd.yml
+├── scripts/                   # Utility scripts
+│   ├── setup.sh               # Setup script
+│   ├── quick_start.sh         # Docker quick start
+│   ├── arbi                   # Service control script
+│   ├── run_tests.sh           # Fast test runner
+│   └── test_service.sh        # Service management tests
 ├── docs/                      # Documentation
 │   ├── ARCHITECTURE.md        # System architecture
 │   ├── EXCHANGES.md           # Exchange configuration
@@ -510,13 +513,13 @@ Simulates trading on historical market data.
 ### Service Control
 
 ```bash
-./arbi start      # Start background service
-./arbi stop       # Stop service
-./arbi restart    # Restart service
-./arbi status     # Check status
-./arbi logs       # View logs
-./arbi install    # Install as LaunchAgent (macOS)
-./arbi uninstall  # Remove LaunchAgent
+scripts/arbi start      # Start background service
+scripts/arbi stop       # Stop service
+scripts/arbi restart    # Restart service
+scripts/arbi status     # Check status
+scripts/arbi logs       # View logs
+scripts/arbi install    # Install as LaunchAgent (macOS)
+scripts/arbi uninstall  # Remove LaunchAgent
 ```
 
 ## Contributing
