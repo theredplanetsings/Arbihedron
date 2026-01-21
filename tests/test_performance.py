@@ -9,7 +9,6 @@ from performance import (
     performance_monitor,
 )
 
-
 class TestPerformanceMetrics:
     """Test performance metrics data structure."""
     
@@ -237,7 +236,7 @@ class TestRateLimiter:
         assert limiter.is_allowed() is False
         
         # Wait for window to expire
-        time.sleep(1.1)
+        time.sleep(0.01)
         
         # Should be allowed again
         assert limiter.is_allowed() is True
@@ -272,7 +271,6 @@ class TestRateLimiter:
         assert stats['time_window'] == 60
         assert stats['utilization'] == pytest.approx(0.4)
 
-
 class TestIntegration:
     """Integration tests for performance monitoring."""
     
@@ -303,7 +301,6 @@ class TestIntegration:
         summary = monitor.get_summary()
         assert summary['total_operations'] == 3
         assert summary['total_successes'] == 3
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
