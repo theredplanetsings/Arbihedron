@@ -146,9 +146,7 @@ def test_utils():
 
 async def run_all_tests():
     """Run all tests."""
-    print("=" * 50)
     print("🔺 Arbihedron Test Suite")
-    print("=" * 50)
     print()
     
     # basic tests that don't need network access
@@ -157,17 +155,13 @@ async def run_all_tests():
     test_utils()
     
     # tests that need to connect to exchanges
-    print("=" * 50)
-    print("Network Tests (May require API credentials)")
-    print("=" * 50)
+    print("Network Tests (might require API credentials)")
     print()
     
     await test_exchange_client()
     await test_arbitrage_engine()
-    
-    print("=" * 50)
-    print("Test Suite Completd")
-    print("=" * 50)
+
+    print("Test Suite Completed")
 
 if __name__ == "__main__":
     try:
