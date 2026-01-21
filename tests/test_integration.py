@@ -4,7 +4,6 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-
 @pytest.mark.integration
 class TestExchangeIntegration:
     """Integration tests for exchange client."""
@@ -20,7 +19,6 @@ class TestExchangeIntegration:
     async def test_fetch_ticker(self):
         """Test fetching ticker data."""
         pass
-
 
 @pytest.mark.integration
 class TestArbitrageEngineIntegration:
@@ -65,7 +63,6 @@ class TestArbitrageEngineIntegration:
         # Test with sample prices
         # profit = engine.calculate_profit(prices, amounts, fees)
         # assert profit >= 0
-
 
 @pytest.mark.integration
 class TestDatabaseIntegration:
@@ -125,7 +122,6 @@ class TestDatabaseIntegration:
         assert stats is not None
         assert stats['total_opportunities'] == 1
 
-
 @pytest.mark.integration  
 class TestCachingIntegration:
     """Integration tests for caching layer."""
@@ -149,7 +145,6 @@ class TestCachingIntegration:
         # Verify it was cached
         mock_client.setex.assert_called_once()
 
-
 @pytest.mark.integration
 class TestPerformanceMonitoring:
     """Integration tests for performance monitoring."""
@@ -164,7 +159,7 @@ class TestPerformanceMonitoring:
         # Simulate multiple operations
         for i in range(10):
             with monitor.measure("test_operation"):
-                time.sleep(0.01)
+                pass  # removed sleep for faster tests
         
         metrics = monitor.get_metrics("test_operation")
         assert metrics['total_operations'] == 10
@@ -174,7 +169,6 @@ class TestPerformanceMonitoring:
         summary = monitor.get_summary()
         assert summary['total_operations'] == 10
         assert summary['system']['memory_mb'] > 0
-
 
 @pytest.mark.integration
 class TestErrorHandlingIntegration:
@@ -195,7 +189,7 @@ class TestErrorHandlingIntegration:
         
         cb = CircuitBreaker(failure_threshold=3, recovery_timeout=1)
         
-        # Should open circuit after 3 failures
+        # open circuit after 3 failures
         for i in range(3):
             with pytest.raises(ConnectionError):
                 cb.call(unstable_api)
@@ -212,19 +206,18 @@ class TestErrorHandlingIntegration:
         
         call_count = 0
         
-        @async_retry_with_backoff(max_retries=3, initial_delay=0.1)
+        @async_retry_with_backoff(max_retries=3, initial_delay=0.001)
         async def flaky_async_operation():
             nonlocal call_count
             call_count += 1
             if call_count < 3:
                 raise ConnectionError("Temporary failure")
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.001)
             return "success"
         
         result = await flaky_async_operation()
         assert result == "success"
         assert call_count == 3
-
 
 @pytest.mark.integration
 class TestEndToEnd:
@@ -242,14 +235,13 @@ class TestEndToEnd:
         pass
     
     def test_bot_lifecycle(self):
-        """Test complete bot initialization and shutdown."""
+        """Test complete bot initialisation and shutdown."""
         # This would test:
-        # 1. Bot initialization
+        # 1. Bot initialisation
         # 2. Component setup
         # 3. Starting monitoring
         # 4. Graceful shutdown
         pass
-
 
 @pytest.mark.integration
 @pytest.mark.slow
@@ -286,8 +278,7 @@ class TestStressTests:
             cache.set(f"key_{i}", {"value": i})
             cache.get(f"key_{i}")
         
-        # Should not crash or leak memory
-
+        # shouldn't crash or leak memory
 
 @pytest.mark.integration
 class TestConfigurationIntegration:
@@ -304,7 +295,6 @@ class TestConfigurationIntegration:
         
         # Verify default values
         assert config.risk.enable_paper_trading is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-m", "integration"])
