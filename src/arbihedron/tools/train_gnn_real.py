@@ -14,12 +14,12 @@ from loguru import logger
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeRemainingColumn
 
-from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
-from arbitrage_engine import ArbitrageEngine
-from exchange_client import ExchangeClient
-from database import ArbihedronDatabase
-from config import config
-from models import TradingPair
+from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+from arbihedron.core.arbitrage_engine import ArbitrageEngine
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.infrastructure.database import ArbihedronDatabase
+from arbihedron.config import config
+from arbihedron.models import TradingPair
 
 console = Console()
 

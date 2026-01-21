@@ -375,7 +375,7 @@ class AlertManager:
 # a convenience function for quick alerts
 async def send_quick_alert(message: str, alert_type: str = "INFO"):
     """Send a quick alert using default config (for debugging)."""
-    from config import ALERT_CONFIG
+    from arbihedron.config import ALERT_CONFIG
     manager = AlertManager(ALERT_CONFIG)
     await manager.initialize()
     try:

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Tuple
 import json
-from database import ArbihedronDatabase
+from arbihedron.infrastructure.database import ArbihedronDatabase
 class ArbihedronAnalytics:
     """Generate analytics and reports from trading data."""
     

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test the database persistence layer."""
 from datetime import datetime
-from database import ArbihedronDatabase
-from models import ArbitrageOpportunity, TradeExecution, TriangularPath, TradingPair, TradeDirection
+from arbihedron.infrastructure.database import ArbihedronDatabase
+from arbihedron.models import ArbitrageOpportunity, TradeExecution, TriangularPath, TradingPair, TradeDirection
 def test_basic_operations():
     """Test basic database operations."""
     print("Testing arbihedron database...")

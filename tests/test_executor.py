@@ -3,11 +3,11 @@ import pytest
 import asyncio
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from executor import TradeExecutor
-from exchange_client import ExchangeClient
-from database import ArbihedronDatabase
-from config import RiskConfig, ExchangeConfig
-from models import (
+from arbihedron.core.executor import TradeExecutor
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.infrastructure.database import ArbihedronDatabase
+from arbihedron.config import RiskConfig, ExchangeConfig
+from arbihedron.models import (
     ArbitrageOpportunity, TriangularPath, TradingPair,
     TradeDirection, TradeExecution
 )

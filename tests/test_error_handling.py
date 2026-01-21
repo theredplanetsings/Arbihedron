@@ -2,7 +2,7 @@
 import pytest
 import time
 import asyncio
-from error_handling import (
+from arbihedron.infrastructure.error_handling import (
     CircuitBreaker,
     CircuitState,
     CircuitBreakerError,

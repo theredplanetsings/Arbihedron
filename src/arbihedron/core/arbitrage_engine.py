@@ -4,15 +4,15 @@ from typing import List, Set, Dict, Tuple, TYPE_CHECKING
 from itertools import permutations
 from datetime import datetime
 from loguru import logger
-from models import (
+from arbihedron.models import (
     TradingPair, TriangularPath, ArbitrageOpportunity,
     TradeDirection, MarketSnapshot
 )
-from config import config, TradingConfig
+from arbihedron.config import config, TradingConfig
 
 # imports after models to avoid circular dependency issues
 if TYPE_CHECKING:
-    from exchange_client import ExchangeClient
+    from .exchange_client import ExchangeClient
 else:
     ExchangeClient = None
 

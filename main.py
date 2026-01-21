@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
 """Main entry point for Arbihedron triangular arbitrage bot."""
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 import asyncio
 import signal
 from datetime import datetime
 from loguru import logger
 from rich.live import Live
 from rich.console import Console
-from config import config
-from exchange_client import ExchangeClient
-from arbitrage_engine import ArbitrageEngine
-from executor import TradeExecutor
-from monitor import ArbitrageMonitor
-from database import ArbihedronDatabase
+from arbihedron.config import config
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.core.arbitrage_engine import ArbitrageEngine
+from arbihedron.core.executor import TradeExecutor
+from arbihedron.monitoring.monitor import ArbitrageMonitor
+from arbihedron.infrastructure.database import ArbihedronDatabase
 
 # GNN imports (conditional)
 try:
-    from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+    from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
     GNN_AVAILABLE = True
 except ImportError:
     GNN_AVAILABLE = False

@@ -27,9 +27,9 @@ class TestArbitrageEngineIntegration:
     @pytest.mark.asyncio
     async def test_find_opportunities_workflow(self):
         """Test complete opportunity finding workflow."""
-        from arbitrage_engine import ArbitrageEngine
-        from exchange_client import ExchangeClient
-        from config import config
+        from arbihedron.core.arbitrage_engine import ArbitrageEngine
+        from arbihedron.core.exchange_client import ExchangeClient
+        from arbihedron.config import arbihedron.config as config
         
         # Mock exchange client
         mock_exchange = Mock(spec=ExchangeClient)
@@ -54,8 +54,8 @@ class TestArbitrageEngineIntegration:
     
     def test_calculate_profit(self):
         """Test profit calculation logic."""
-        from arbitrage_engine import ArbitrageEngine
-        from config import config
+        from arbihedron.core.arbitrage_engine import ArbitrageEngine
+        from arbihedron.config import arbihedron.config as config
         
         mock_exchange = Mock()
         engine = ArbitrageEngine(mock_exchange, config.trading)
@@ -70,9 +70,9 @@ class TestDatabaseIntegration:
     
     def test_session_lifecycle(self):
         """Test complete session lifecycle in database."""
-        from database import ArbihedronDatabase
+        from arbihedron.infrastructure.database import ArbihedronDatabase
         
-        from models import ArbitrageOpportunity, TriangularPath
+        from arbihedron.models import ArbitrageOpportunity, TriangularPath
         from datetime import datetime
         
         db = ArbihedronDatabase(":memory:")  # Use in-memory DB for testing
@@ -82,7 +82,7 @@ class TestDatabaseIntegration:
         assert session_id is not None
         
         # Record opportunity
-        from models import TradingPair, TradeDirection
+        from arbihedron.models import TradingPair, TradeDirection
         
         pair = TradingPair(
             symbol="BTC/USDT", 
@@ -129,7 +129,7 @@ class TestCachingIntegration:
     @patch('cache.redis.Redis')
     def test_cache_with_engine(self, mock_redis):
         """Test cache integration with arbitrage engine."""
-        from cache import CacheManager, CacheKeys
+        from arbihedron.infrastructure.cache import CacheManager, CacheKeys
         
         mock_client = Mock()
         mock_client.ping.return_value = True
@@ -151,7 +151,7 @@ class TestPerformanceMonitoring:
     
     def test_monitor_with_real_operations(self):
         """Test performance monitor with real operations."""
-        from performance import PerformanceMonitor
+        from arbihedron.infrastructure.performance import PerformanceMonitor
         import time
         
         monitor = PerformanceMonitor()
@@ -176,7 +176,7 @@ class TestErrorHandlingIntegration:
     
     def test_circuit_breaker_with_api_calls(self):
         """Test circuit breaker with simulated API calls."""
-        from error_handling import CircuitBreaker
+        from arbihedron.infrastructure.error_handling import CircuitBreaker
         
         call_count = 0
         
@@ -195,14 +195,14 @@ class TestErrorHandlingIntegration:
                 cb.call(unstable_api)
         
         # Circuit should be open
-        from error_handling import CircuitBreakerError
+        from arbihedron.infrastructure.error_handling import CircuitBreakerError
         with pytest.raises(CircuitBreakerError):
             cb.call(unstable_api)
     
     @pytest.mark.asyncio
     async def test_retry_with_async_operations(self):
         """Test retry logic with async operations."""
-        from error_handling import async_retry_with_backoff
+        from arbihedron.infrastructure.error_handling import async_retry_with_backoff
         
         call_count = 0
         
@@ -250,7 +250,7 @@ class TestStressTests:
     
     def test_high_frequency_opportunity_detection(self):
         """Test system under high-frequency operation."""
-        from performance import PerformanceMonitor
+        from arbihedron.infrastructure.performance import PerformanceMonitor
         
         monitor = PerformanceMonitor()
         
@@ -269,7 +269,7 @@ class TestStressTests:
     
     def test_cache_under_load(self):
         """Test cache performance under load."""
-        from cache import CacheManager
+        from arbihedron.infrastructure.cache import CacheManager
         
         cache = CacheManager(enabled=False)  # Use disabled cache for testing
         
@@ -286,7 +286,7 @@ class TestConfigurationIntegration:
     
     def test_config_loading(self):
         """Test configuration loads correctly."""
-        from config import config
+        from arbihedron.config import arbihedron.config as config
         
         assert config.exchange is not None
         assert config.trading is not None

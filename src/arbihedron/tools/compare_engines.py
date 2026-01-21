@@ -5,10 +5,10 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from datetime import datetime
-from config import config
-from exchange_client import ExchangeClient
-from arbitrage_engine import ArbitrageEngine
-from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+from arbihedron.config import config
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.core.arbitrage_engine import ArbitrageEngine
+from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
 
 console = Console()
 

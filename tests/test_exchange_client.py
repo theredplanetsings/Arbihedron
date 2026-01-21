@@ -3,9 +3,9 @@ import pytest
 import asyncio
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from exchange_client import ExchangeClient
-from config import ExchangeConfig
-from models import TradingPair, TradeDirection
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.config import ExchangeConfig
+from arbihedron.models import TradingPair, TradeDirection
 
 class TestExchangeClient:
     """Test suite for exchange client functionality."""

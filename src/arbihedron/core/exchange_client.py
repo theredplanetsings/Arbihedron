@@ -4,8 +4,8 @@ import asyncio
 from typing import Dict, List, Optional
 from datetime import datetime
 from loguru import logger
-from models import TradingPair, TradeDirection
-from config import config, ExchangeConfig
+from arbihedron.models import TradingPair, TradeDirection
+from arbihedron.config import config, ExchangeConfig
 
 class ExchangeClient:
     """Handles all exchange interactions."""

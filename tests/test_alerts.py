@@ -5,8 +5,8 @@ import sys
 import pytest
 from rich.console import Console
 from rich.panel import Panel
-from alerts import AlertManager
-from config import ALERT_CONFIG
+from arbihedron.monitoring.alerts import AlertManager
+from arbihedron.config import ALERT_CONFIG
 
 @pytest.mark.asyncio
 async def test_alert_system():

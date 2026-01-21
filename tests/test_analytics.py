@@ -1,9 +1,9 @@
 """Tests for the analytics module."""
 import pytest
 from datetime import datetime, timedelta
-from database import ArbihedronDatabase
-from analytics import ArbihedronAnalytics
-from models import (
+from arbihedron.infrastructure.database import ArbihedronDatabase
+from arbihedron.monitoring.analytics import ArbihedronAnalytics
+from arbihedron.models import (
     ArbitrageOpportunity, TradeExecution, TriangularPath,
     TradingPair, TradeDirection
 )

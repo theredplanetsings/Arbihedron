@@ -8,8 +8,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import asyncio
 from datetime import datetime
-from models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection
-from config import config
+from arbihedron.models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection
+from arbihedron.config import arbihedron.config as config
 
 def test_models():
     """Test data models."""
@@ -67,7 +67,7 @@ async def test_exchange_client():
     print("Testing exchange client...")
     
     try:
-        from exchange_client import ExchangeClient
+        from arbihedron.core.exchange_client import ExchangeClient
         
         client = ExchangeClient(config.exchange)
         print(f"ok: Exchange client initialized: {client.exchange.name}")
@@ -96,8 +96,8 @@ async def test_arbitrage_engine():
     print("Testing arbitrage engine...")
     
     try:
-        from exchange_client import ExchangeClient
-        from arbitrage_engine import ArbitrageEngine
+        from arbihedron.core.exchange_client import ExchangeClient
+        from arbihedron.core.arbitrage_engine import ArbitrageEngine
         
         client = ExchangeClient(config.exchange)
         engine = ArbitrageEngine(client, config.trading)
@@ -126,7 +126,7 @@ def test_utils():
     """Test utility functions."""
     print("Testing utility functions...")
     
-    from utils import (
+    from arbihedron.utils import (
         format_currency, format_percentage, 
         validate_trading_pair, parse_symbol
     )

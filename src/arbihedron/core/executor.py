@@ -3,14 +3,14 @@ import asyncio
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from loguru import logger
-from models import (
+from arbihedron.models import (
     ArbitrageOpportunity, TradeExecution, TradeDirection
 )
-from config import config, RiskConfig
+from arbihedron.config import config, RiskConfig
 
 if TYPE_CHECKING:
-    from exchange_client import ExchangeClient
-    from database import ArbihedronDatabase
+    from .exchange_client import ExchangeClient
+    from arbihedron.infrastructure.database import ArbihedronDatabase
 
 class TradeExecutor:
     """Executes triangular arbitrage trades."""

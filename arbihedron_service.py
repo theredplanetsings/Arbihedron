@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Service wrapper for Arbihedron with auto-restart and health monitoring."""
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 import asyncio
 import signal
-import sys
 import time
 from datetime import datetime
-from pathlib import Path
 from loguru import logger
 from main import ArbihedronBot
-from alerts import AlertManager
-from health_monitor import HealthMonitor
-from config import ALERT_CONFIG, HEALTH_CONFIG
+from arbihedron.monitoring.alerts import AlertManager
+from arbihedron.infrastructure.health_monitor import HealthMonitor
+from arbihedron.config import ALERT_CONFIG, HEALTH_CONFIG
 
 class ArbihedronService:
     """Service wrapper with health monitoring and auto-restart."""

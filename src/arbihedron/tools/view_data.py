@@ -5,7 +5,7 @@ from datetime import datetime
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from database import ArbihedronDatabase
+from arbihedron.infrastructure.database import ArbihedronDatabase
 def show_sessions(db: ArbihedronDatabase):
     """Display all trading sessions."""
     console = Console()

@@ -28,9 +28,9 @@ class ArbitrageBacktest:
         """Run backtest on historical data."""
         # set up components if we haven't already
         if self.engine is None:
-            from exchange_client import ExchangeClient
-            from arbitrage_engine import ArbitrageEngine
-            from config import config
+            from arbihedron.core.exchange_client import ExchangeClient
+            from arbihedron.core.arbitrage_engine import ArbitrageEngine
+            from arbihedron.config import config
             
             self.exchange = ExchangeClient(config.exchange)
             self.engine = ArbitrageEngine(self.exchange, config.trading)
@@ -125,9 +125,9 @@ class ArbitrageBacktest:
 
 async def main():
     """Run backtest."""
-    from exchange_client import ExchangeClient
-    from arbitrage_engine import ArbitrageEngine
-    from config import config
+    from arbihedron.core.exchange_client import ExchangeClient
+    from arbihedron.core.arbitrage_engine import ArbitrageEngine
+    from arbihedron.config import config
     
     exchange = ExchangeClient(config.exchange)
     engine = ArbitrageEngine(exchange, config.trading)

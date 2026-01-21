@@ -26,8 +26,8 @@ from datetime import datetime
 from loguru import logger
 from dataclasses import dataclass
 
-from models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection, MarketSnapshot
-from config import TradingConfig
+from arbihedron.models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection, MarketSnapshot
+from arbihedron.config import TradingConfig
 @dataclass
 class GNNConfig:
     """Configuration for GNN arbitrage detection."""

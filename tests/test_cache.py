@@ -1,7 +1,7 @@
 """Unit tests for cache manager."""
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from cache import CacheManager, CacheKeys, cache_result
+from arbihedron.infrastructure.cache import CacheManager, CacheKeys, cache_result
 import json
 
 

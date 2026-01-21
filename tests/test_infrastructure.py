@@ -7,9 +7,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import time
-from performance import performance_monitor, RateLimiter
-from error_handling import CircuitBreaker, retry_with_backoff, SafeExecutor
-from cache import CacheManager, CacheKeys
+from arbihedron.infrastructure.performance import performance_monitor, RateLimiter
+from arbihedron.infrastructure.error_handling import CircuitBreaker, retry_with_backoff, SafeExecutor
+from arbihedron.infrastructure.cache import CacheManager, CacheKeys
 
 print("🔺 Arbihedron Infrastructure Test Suite")
 print("=" * 60)

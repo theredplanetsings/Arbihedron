@@ -8,9 +8,9 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.layout import Layout
 from loguru import logger
-from models import ArbitrageOpportunity, MarketSnapshot
+from arbihedron.models import ArbitrageOpportunity, MarketSnapshot
 if TYPE_CHECKING:
-    from database import ArbihedronDatabase
+    from arbihedron.infrastructure.database import ArbihedronDatabase
 
 class ArbitrageMonitor:
     """Monitors and displays arbitrage opportunities in real-time."""

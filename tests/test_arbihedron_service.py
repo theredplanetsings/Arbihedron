@@ -5,9 +5,9 @@ import time
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from arbihedron_service import ArbihedronService
-from alerts import AlertManager, AlertConfig
-from health_monitor import HealthMonitor
-from config import HealthConfig
+from arbihedron.monitoring.alerts import AlertManager, AlertConfig
+from arbihedron.infrastructure.health_monitor import HealthMonitor
+from arbihedron.config import HealthConfig
 
 class TestArbihedronService:
     """Test suite for service wrapper functionality."""

@@ -1,7 +1,7 @@
 """Comprehensive unit tests for performance monitoring."""
 import pytest
 import time
-from performance import (
+from arbihedron.infrastructure.performance import (
     PerformanceMetrics,
     PerformanceMonitor,
     OperationTimer,

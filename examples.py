@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Simple example showing how to use Arbihedron."""
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
 import asyncio
-from exchange_client import ExchangeClient
-from arbitrage_engine import ArbitrageEngine
-from config import config
+from arbihedron.core.exchange_client import ExchangeClient
+from arbihedron.core.arbitrage_engine import ArbitrageEngine
+from arbihedron.config import config
 
 async def simple_scan_example():
     """Simple example: scan for opportunities."""

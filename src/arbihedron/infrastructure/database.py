@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
 from loguru import logger
-from models import ArbitrageOpportunity, TradeExecution
+from arbihedron.models import ArbitrageOpportunity, TradeExecution
 
 class ArbihedronDatabase:
     """Handles all data persistence for the arbitrage bot."""

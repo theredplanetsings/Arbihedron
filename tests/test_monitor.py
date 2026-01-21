@@ -2,9 +2,9 @@
 import pytest
 from datetime import datetime
 from unittest.mock import Mock, MagicMock, patch
-from monitor import ArbitrageMonitor
-from database import ArbihedronDatabase
-from models import (
+from arbihedron.monitoring.monitor import ArbitrageMonitor
+from arbihedron.infrastructure.database import ArbihedronDatabase
+from arbihedron.models import (
     ArbitrageOpportunity, MarketSnapshot, TriangularPath,
     TradingPair, TradeDirection, TradeExecution
 )

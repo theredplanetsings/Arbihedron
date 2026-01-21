@@ -13,9 +13,9 @@ console = Console()
 @pytest_asyncio.fixture
 async def engine():
     """Fixture to create GNN engine for tests."""
-    from config import config
-    from exchange_client import ExchangeClient
-    from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+    from arbihedron.config import arbihedron.config as config
+    from arbihedron.core.exchange_client import ExchangeClient
+    from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
     
     exchange = ExchangeClient(config.exchange)
     gnn_config = GNNConfig(
@@ -56,7 +56,7 @@ async def test_gnn_imports():
         return False
     
     try:
-        from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+        from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
         console.print("OK GNN Arbitrage Engine module", style="green")
     except ImportError as e:
         console.print(f"X GNN module import failed: {e}", style="red")
@@ -71,9 +71,9 @@ async def test_gnn_initialization():
     console.print(Panel.fit(" Testing GNN Initialization", style="bold cyan"))
     
     try:
-        from config import config
-        from exchange_client import ExchangeClient
-        from gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
+        from arbihedron.config import arbihedron.config as config
+        from arbihedron.core.exchange_client import ExchangeClient
+        from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
         
         # creates minimal exchange client
         exchange = ExchangeClient(config.exchange)
