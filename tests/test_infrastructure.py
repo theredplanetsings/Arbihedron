@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """Test script to demonstrate the new infrastructure improvements."""
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import time
 from performance import performance_monitor, RateLimiter
 from error_handling import CircuitBreaker, retry_with_backoff, SafeExecutor

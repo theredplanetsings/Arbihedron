@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """Test suite for Arbihedron components."""
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import asyncio
 from datetime import datetime
 from models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection
