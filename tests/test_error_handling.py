@@ -12,7 +12,6 @@ from error_handling import (
     SafeExecutor,
 )
 
-
 class TestCircuitBreaker:
     """Test circuit breaker functionality."""
     
@@ -65,7 +64,7 @@ class TestCircuitBreaker:
         assert cb.state == CircuitState.OPEN
         
         # Wait for recovery timeout
-        time.sleep(1.1)
+        time.sleep(0.01)
         
         # Should enter half-open and succeed
         result = cb.call(success_func)
@@ -98,7 +97,7 @@ class TestCircuitBreaker:
         cb = CircuitBreaker(failure_threshold=2, name="test_async")
         
         async def success_func():
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.001)
             return "async_success"
         
         result = await cb.call_async(success_func)
@@ -127,7 +126,7 @@ class TestRetryDecorator:
         """Test retry succeeds after initial failures."""
         call_count = 0
         
-        @retry_with_backoff(max_retries=3, initial_delay=0.1)
+        @retry_with_backoff(max_retries=3, initial_delay=0.001)
         def eventual_success():
             nonlocal call_count
             call_count += 1
@@ -143,7 +142,7 @@ class TestRetryDecorator:
         """Test retry fails after max attempts."""
         call_count = 0
         
-        @retry_with_backoff(max_retries=2, initial_delay=0.1)
+        @retry_with_backoff(max_retries=2, initial_delay=0.001)
         def always_fails():
             nonlocal call_count
             call_count += 1
@@ -161,7 +160,7 @@ class TestRetryDecorator:
         
         @retry_with_backoff(
             max_retries=2,
-            initial_delay=0.1,
+            initial_delay=0.001,
             backoff_factor=2.0,
         )
         def failing_func():
@@ -182,7 +181,7 @@ class TestRetryDecorator:
         """Test async retry decorator."""
         call_count = 0
         
-        @async_retry_with_backoff(max_retries=2, initial_delay=0.1)
+        @async_retry_with_backoff(max_retries=2, initial_delay=0.001)
         async def async_eventual_success():
             nonlocal call_count
             call_count += 1
@@ -250,7 +249,6 @@ class TestErrorHandler:
         assert cb1.state == CircuitState.CLOSED
         assert cb2.state == CircuitState.CLOSED
 
-
 class TestSafeExecutor:
     """Test safe executor functionality."""
     
@@ -299,7 +297,6 @@ class TestSafeExecutor:
         
         result = await SafeExecutor.execute_with_fallback_async(primary, fallback)
         assert result == "async_fallback"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
