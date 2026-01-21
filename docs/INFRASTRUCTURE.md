@@ -425,7 +425,7 @@ logger.error("API call failed", error=str(e), retry_count=3)
    )
    ```
 
-##  Configuration
+##  Environment Configuration
 
 Add to `.env`:
 
@@ -434,7 +434,6 @@ Add to `.env`:
 REDIS_ENABLED=true
 REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=
 REDIS_DB=0
 
 # Performance

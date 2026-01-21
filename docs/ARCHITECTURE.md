@@ -240,23 +240,36 @@ return min(risk_score, 100)
 
 ## Testing Strategy
 
+Comprehensive test suite with 90%+ coverage. See individual test files in `tests/` directory.
+
 ### Unit Tests
-- Model validation
-- Configuration parsing
-- Utility functions
-- Calculation accuracy
+- Model validation and data structures
+- Configuration parsing and validation
+- Utility functions and calculations
+- Algorithm accuracy
 
 ### Integration Tests
 - Exchange client connectivity
-- Path discovery
-- Opportunity scanning
+- Path discovery and validation
+- Opportunity scanning and detection
 - Execution simulation
+- Cache and database operations
 
 ### End-to-End Tests
 - Full bot lifecycle
-- Error recovery
-- Graceful shutdown
-- Performance benchmarks
+- Error recovery and circuit breakers
+- Graceful shutdown and cleanup
+- Performance benchmarks and profiling
+
+### Running Tests
+```bash
+pytest                          # Run all tests
+pytest --cov=. --cov-report=html  # With coverage
+pytest -m unit                  # Unit tests only
+pytest -m integration           # Integration tests only
+```
+
+See [INFRASTRUCTURE.md](../docs/INFRASTRUCTURE.md) for detailed testing guide.
 
 ## Monitoring & Logging
 
@@ -266,28 +279,17 @@ return min(risk_score, 100)
 - Average slippage
 - Total profit/loss
 - API call latency
+- Cache hit rates
+- Circuit breaker states
 
 ### Logging Levels
 - DEBUG: Detailed execution flow
 - INFO: Opportunities and executions
 - WARNING: Rate limits, low liquidity
 - ERROR: Failed trades, API errors
+- SUCCESS: Successful executions
 
-## Future Enhancements
-
-### Short-term
-- WebSocket support for real-time data
-- Advanced risk models
-- Machine learning for opportunity prediction
-- More exchanges
-
-### Long-term
-- Cross-exchange arbitrage
-- Options arbitrage
-- Statistical arbitrage
-- Automated parameter optimisation
-- Cloud deployment
-- Web dashboard
+See [logs.md](logs.md) for logging configuration.
 
 ---
 

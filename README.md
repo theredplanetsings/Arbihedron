@@ -13,15 +13,15 @@ Paper trading mode enabled by default.
 - Risk management with configurable thresholds
 - Paper trading mode (default)
 - Performance analytics and backtesting
-- RESTful API service
+- RESTful API service with FastAPI
 - Database persistence (SQLite)
-- Email alerts for significant opportunities
-- **NEW**: Docker containerization for easy deployment
-- **NEW**: CI/CD pipeline with automated testing
-- **NEW**: Redis caching for improved performance
-- **NEW**: Performance monitoring and profiling
-- **NEW**: Circuit breakers and retry logic for reliability
-- **NEW**: Comprehensive test suite with 90%+ coverage
+- Email/Slack alerts for significant opportunities
+- Docker containerization for easy deployment
+- CI/CD pipeline with automated testing
+- Redis caching for improved performance
+- Performance monitoring and profiling
+- Circuit breakers and retry logic for reliability
+- Comprehensive test suite with 90%+ coverage
 
 ## How It Works
 
@@ -183,31 +183,37 @@ Arbihedron/
 ├── view_data.py               # Data visualization
 ├── requirements.txt           # Dependencies
 ├── setup.sh                   # Setup script
-├── performance.py             # NEW: Performance monitoring
-├── cache.py                   # NEW: Redis caching layer
-├── error_handling.py          # NEW: Circuit breakers & retry logic
-├── quick_start.sh             # NEW: Docker quick start
-├── Dockerfile                 # NEW: Docker build config
-├── docker-compose.yml         # NEW: Docker orchestration
-├── pytest.ini                 # NEW: Test configuration
-├── .github/workflows/         # NEW: CI/CD pipelines
+├── performance.py             # Performance monitoring
+├── cache.py                   # Redis caching layer
+├── error_handling.py          # Circuit breakers & retry logic
+├── quick_start.sh             # Docker quick start
+├── Dockerfile                 # Docker build config
+├── docker-compose.yml         # Docker orchestration
+├── pytest.ini                 # Test configuration
+├── .github/workflows/         # CI/CD pipelines
 │   └── ci-cd.yml
 ├── docs/                      # Documentation
 │   ├── ARCHITECTURE.md        # System architecture
-│   ├── EXCHANGES.md           # Exchange details
+│   ├── EXCHANGES.md           # Exchange configuration
 │   ├── GNN_ARCHITECTURE.md    # GNN implementation
-│   ├── INFRASTRUCTURE.md      # NEW: Infrastructure guide
+│   ├── INFRASTRUCTURE.md      # Infrastructure & deployment
+│   ├── OVERFITTING_PREVENTION.md  # GNN overfitting strategies
 │   └── logs.md                # Logging guide
-├── tests/                     # Test suite
-│   ├── test.py
+├── tests/                     # Comprehensive test suite
 │   ├── test_alerts.py
+│   ├── test_analytics.py
+│   ├── test_arbihedron_service.py
+│   ├── test_arbitrage_engine.py
+│   ├── test_cache.py
 │   ├── test_database.py
+│   ├── test_error_handling.py
+│   ├── test_exchange_client.py
+│   ├── test_executor.py
 │   ├── test_gnn.py
-│   ├── test_error_handling.py # NEW: Error handling tests
-│   ├── test_performance.py    # NEW: Performance tests
-│   ├── test_cache.py          # NEW: Cache tests
-│   └── test_integration.py    # NEW: Integration tests
-├── monitoring/                # NEW: Monitoring configs
+│   ├── test_integration.py
+│   ├── test_monitor.py
+│   └── test_performance.py
+├── monitoring/                # Monitoring configs
 │   └── prometheus.yml
 └── models/                    # Trained GNN models
 ```
@@ -511,18 +517,6 @@ Simulates trading on historical market data.
 ./arbi logs       # View logs
 ./arbi install    # Install as LaunchAgent (macOS)
 ./arbi uninstall  # Remove LaunchAgent
-```
-
-### Testing
-
-```bash
-# Run all tests
-cd tests
-python -m pytest
-
-# Run specific test
-python test_database.py
-python test_gnn.py
 ```
 
 ## Contributing

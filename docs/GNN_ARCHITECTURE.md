@@ -117,12 +117,15 @@ The model can optionally integrate Deep Q-Learning principles:
 ```
 Arbihedron/
 ├── gnn_arbitrage_engine.py    # Main GNN engine
-├── train_gnn.py                # Training pipeline
-├── models/                     # Saved models
-│   ├── gnn_arbitrage_best.pth
-│   └── training_curves.png
-├── config.py                   # Configuration (includes GNN settings)
-└── main.py                     # Entry point (supports GNN mode)
+├── train_gnn_real.py          # Training pipeline with real market data
+├── compare_engines.py         # Compare traditional vs GNN engines
+├── models/                    # Saved models
+│   └── gnn_arbitrage_best.pth
+├── config.py                  # Configuration (includes GNN settings)
+├── main.py                    # Entry point (supports GNN mode)
+└── docs/
+    ├── GNN_ARCHITECTURE.md    # This file
+    └── OVERFITTING_PREVENTION.md  # Overfitting strategies
 ```
 
 ### Key Classes
@@ -180,10 +183,16 @@ gnn_config = GNNConfig(
 ### Training a Model
 
 ```bash
-python train_gnn.py
+python train_gnn_real.py --num-scans 100 --epochs 50
 ```
 
-This will initialise the exchange connection, collect market snapshots, train the GNN model, and save the best model with training curves.
+This will:
+1. Initialize exchange connection
+2. Collect real market data over time
+3. Train the GNN model with early stopping
+4. Save the best model to `models/gnn_arbitrage_best.pth`
+
+See [OVERFITTING_PREVENTION.md](OVERFITTING_PREVENTION.md) for details on regularization strategies.
 
 ### Running with GNN Detection
 
