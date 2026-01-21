@@ -161,34 +161,38 @@ Only enable after thorough testing:
 
 ```
 Arbihedron/
-├── main.py                    # Main orchestrator
-├── config.py                  # Configuration management
-├── models.py                  # Data models
-├── exchange_client.py         # Exchange API integration
-├── arbitrage_engine.py        # Traditional arbitrage detection
-├── gnn_arbitrage_engine.py    # GNN-based detection (experimental)
-├── train_gnn_real.py          # GNN training on real market data
-├── compare_engines.py         # Traditional vs GNN comparison
-├── executor.py                # Trade execution engine
-├── monitor.py                 # Real-time monitoring & UI
-├── backtest.py                # Backtesting framework
-├── database.py                # SQLite persistence layer
-├── analytics.py               # Performance analytics
-├── alerts.py                  # Email/Slack notifications
-├── health_monitor.py          # HTTP health endpoints
-├── arbihedron_service.py      # Service wrapper with auto-restart
-├── utils.py                   # Utility functions
+├── main.py                    # Main entry point
+├── arbihedron_service.py      # Service wrapper with auto-restart  
 ├── examples.py                # Usage examples
-├── view_data.py               # Data visualization
 ├── requirements.txt           # Dependencies
-├── performance.py             # Performance monitoring
-├── cache.py                   # Redis caching layer
-├── error_handling.py          # Circuit breakers & retry logic
+├── pyproject.toml             # Python project configuration
 ├── Dockerfile                 # Docker build config
 ├── docker-compose.yml         # Docker orchestration
-├── pyproject.toml             # Python project configuration
-├── .github/workflows/         # CI/CD pipelines
-│   └── ci-cd.yml
+├── src/arbihedron/            # Main package
+│   ├── __init__.py
+│   ├── config.py              # Configuration management
+│   ├── models.py              # Data models
+│   ├── utils.py               # Utility functions
+│   ├── core/                  # Core trading engine
+│   │   ├── exchange_client.py      # Exchange API integration
+│   │   ├── arbitrage_engine.py     # Traditional detection
+│   │   ├── gnn_arbitrage_engine.py # GNN-based detection
+│   │   └── executor.py             # Trade execution
+│   ├── infrastructure/        # Infrastructure components
+│   │   ├── cache.py                # Redis caching
+│   │   ├── database.py             # SQLite persistence
+│   │   ├── error_handling.py       # Circuit breakers & retry
+│   │   ├── performance.py          # Performance monitoring
+│   │   └── health_monitor.py       # HTTP health endpoints
+│   ├── monitoring/            # Monitoring & analytics
+│   │   ├── monitor.py              # Real-time UI
+│   │   ├── alerts.py               # Email/Slack notifications
+│   │   └── analytics.py            # Performance analytics
+│   └── tools/                 # Analysis & training tools
+│       ├── backtest.py             # Backtesting framework
+│       ├── compare_engines.py      # Engine comparison
+│       ├── train_gnn_real.py       # GNN training
+│       └── view_data.py            # Data visualization
 ├── scripts/                   # Utility scripts
 │   ├── setup.sh               # Setup script
 │   ├── quick_start.sh         # Docker quick start
@@ -227,8 +231,7 @@ Arbihedron/
 
 ```python
 import asyncio
-from exchange_client import ExchangeClient
-from arbitrage_engine import ArbitrageEngine
+from arbihedron.core import ExchangeClient, ArbitrageEngine
 
 async def scan():
     exchange = ExchangeClient()
@@ -249,8 +252,7 @@ asyncio.run(scan())
 
 ```python
 import asyncio
-from exchange_client import ExchangeClient
-from gnn_arbitrage_engine import GNNArbitrageEngine
+from arbihedron.core import ExchangeClient, GNNArbitrageEngine
 
 async def scan_with_gnn():
     exchange = ExchangeClient()
@@ -271,10 +273,10 @@ asyncio.run(scan_with_gnn())
 
 ```python
 import asyncio
-from train_gnn_real import GNNTrainer
+from arbihedron.tools import RealDataGNNTrainer
 
 async def train():
-    trainer = GNNTrainer()
+    trainer = RealDataGNNTrainer()
     
     # Collect training data from live markets
     await trainer.collect_training_data(num_scans=100, wait_between_scans=30)
