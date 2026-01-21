@@ -191,7 +191,7 @@ async def test_gnn_inference(engine):
 async def test_cycle_detection(engine):
     """Test arbitrage cycle detection."""
     console.print("\n")
-    console.print(Panel.fit("🔺 Testing Cycle Detection", style="bold cyan"))
+    console.print(Panel.fit("Testing Cycle Detection", style="bold cyan"))
     
     try:
         # scans for opportunities
@@ -235,14 +235,14 @@ async def main():
     
     # Test 1: Imports
     if not await test_gnn_imports():
-        console.print("\n❌ Import tests failed. Install dependencies first:", style="bold red")
+        console.print("\n❌Import tests failed. Install dependencies first:", style="bold red")
         console.print("   pip install torch torch-geometric", style="yellow")
         return False
     
-    # Test 2: Initialization
+    # Test 2: Initialisation
     engine = await test_gnn_initialization()
     if engine is None:
-        console.print("\n❌ Initialization failed", style="bold red")
+        console.print("\n❌Initialisation failed", style="bold red")
         return False
     
     # Test 3: Graph construction
@@ -275,10 +275,10 @@ if __name__ == "__main__":
         success = asyncio.run(main())
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        console.print("\n\nWARNING  Test interrupted by user", style="yellow")
+        console.print("\n\n~~~WARNING~~~Test interrupted by user", style="yellow")
         sys.exit(1)
     except Exception as e:
-        console.print(f"\n\n❌ Test failed with error: {e}", style="red")
+        console.print(f"\n\n❌Test failed with error: {e}", style="red")
         import traceback
         console.print(traceback.format_exc(), style="red dim")
         sys.exit(1)
