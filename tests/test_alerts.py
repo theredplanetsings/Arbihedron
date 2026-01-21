@@ -98,7 +98,7 @@ async def test_alert_system():
                 volume=1000.0,
                 exchanges=["Binance", "Kraken"]
             )
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.01)
             
             # tests the execution alert
             console.print("  Testing execution alert...")
@@ -108,7 +108,7 @@ async def test_alert_system():
                 final_balance=1012.30,
                 success=True
             )
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.01)
             
             # tests the health alert
             console.print("  Testing health alert...")
