@@ -162,17 +162,18 @@ Only enable after thorough testing:
 ```
 Arbihedron/
 ├── main.py                    # Main entry point
-├── arbihedron_service.py      # Service wrapper with auto-restart  
-├── examples.py                # Usage examples
 ├── requirements.txt           # Dependencies
 ├── pyproject.toml             # Python project configuration
 ├── Dockerfile                 # Docker build config
 ├── docker-compose.yml         # Docker orchestration
+├── examples/                  # Usage examples
+│   └── examples.py
 ├── src/arbihedron/            # Main package
 │   ├── __init__.py
 │   ├── config.py              # Configuration management
 │   ├── models.py              # Data models
 │   ├── utils.py               # Utility functions
+│   ├── service.py             # Service wrapper with auto-restart
 │   ├── core/                  # Core trading engine
 │   │   ├── exchange_client.py      # Exchange API integration
 │   │   ├── arbitrage_engine.py     # Traditional detection
@@ -209,7 +210,7 @@ Arbihedron/
 ├── tests/                     # Comprehensive test suite
 │   ├── test_alerts.py
 │   ├── test_analytics.py
-│   ├── test_arbihedron_service.py
+│   ├── test_arbihedron_service.py  # Service wrapper tests
 │   ├── test_arbitrage_engine.py
 │   ├── test_cache.py
 │   ├── test_database.py

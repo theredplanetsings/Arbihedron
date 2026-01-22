@@ -20,7 +20,7 @@ echo ""
 
 # Test 4: Service script exists
 echo "✓ Test 4: Service script"
-[ -f ./arbihedron_service.py ] && echo "  Service script exists" || echo "  ⚠️  Service script missing"
+[ -f ./src/arbihedron/service.py ] && echo "  Service script exists" || echo "  ⚠️  Service script missing"
 echo ""
 
 # Test 5: Log directory exists

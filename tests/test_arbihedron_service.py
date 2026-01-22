@@ -4,7 +4,7 @@ import asyncio
 import time
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from arbihedron_service import ArbihedronService
+from arbihedron.service import ArbihedronService
 from arbihedron.monitoring.alerts import AlertManager, AlertConfig
 from arbihedron.infrastructure.health_monitor import HealthMonitor
 from arbihedron.config import HealthConfig
@@ -15,9 +15,9 @@ class TestArbihedronService:
     @pytest.fixture
     def service(self):
         """Create service instance."""
-        with patch('arbihedron_service.AlertManager'):
-            with patch('arbihedron_service.HealthMonitor'):
-                with patch('arbihedron_service.ArbihedronBot'):
+        with patch('arbihedron.service.AlertManager'):
+            with patch('arbihedron.service.HealthMonitor'):
+                with patch('arbihedron.service.ArbihedronBot'):
                     return ArbihedronService()
     
     def test_initialization(self, service):
@@ -79,14 +79,14 @@ class TestArbihedronService:
     @pytest.mark.asyncio
     async def test_run_bot_with_monitoring_no_alerts(self):
         """Test running bot without alerts configured."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = False
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = False
                 
-                with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                     mock_bot = MagicMock()
                     mock_bot.initialize = AsyncMock()
                     mock_bot.run = AsyncMock()
@@ -103,20 +103,20 @@ class TestArbihedronService:
     @pytest.mark.asyncio
     async def test_run_bot_with_alerts_enabled(self):
         """Test running bot with alerts enabled."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = True
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = False
                 
-                with patch('arbihedron_service.AlertManager') as mock_alert_class:
+                with patch('arbihedron.service.AlertManager') as mock_alert_class:
                     mock_alert = MagicMock()
                     mock_alert.initialize = AsyncMock()
                     mock_alert.alert_startup = AsyncMock()
                     mock_alert_class.return_value = mock_alert
                     
-                    with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                    with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                         mock_bot = MagicMock()
                         mock_bot.initialize = AsyncMock()
                         mock_bot.run = AsyncMock()
@@ -132,20 +132,20 @@ class TestArbihedronService:
     @pytest.mark.asyncio
     async def test_run_bot_with_health_monitoring_enabled(self):
         """Test running bot with health monitoring enabled."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = False
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = True
                 mock_health_config.port = 8080
                 
-                with patch('arbihedron_service.HealthMonitor') as mock_health_class:
+                with patch('arbihedron.service.HealthMonitor') as mock_health_class:
                     mock_health = MagicMock()
                     mock_health.initialize = AsyncMock()
                     mock_health_class.return_value = mock_health
                     
-                    with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                    with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                         mock_bot = MagicMock()
                         mock_bot.initialize = AsyncMock()
                         mock_bot.run = AsyncMock()
@@ -161,14 +161,14 @@ class TestArbihedronService:
     @pytest.mark.asyncio
     async def test_run_bot_handles_exceptions(self):
         """Test that bot exceptions are handled gracefully."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = False
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = False
                 
-                with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                     mock_bot = MagicMock()
                     mock_bot.initialize = AsyncMock(side_effect=Exception("Init error"))
                     mock_bot_class.return_value = mock_bot
@@ -228,9 +228,9 @@ class TestServiceEdgeCases:
         """Test that service creates log directory on init."""
         from pathlib import Path
         
-        with patch('arbihedron_service.AlertManager'):
-            with patch('arbihedron_service.HealthMonitor'):
-                with patch('arbihedron_service.ArbihedronBot'):
+        with patch('arbihedron.service.AlertManager'):
+            with patch('arbihedron.service.HealthMonitor'):
+                with patch('arbihedron.service.ArbihedronBot'):
                     service = ArbihedronService()
                     
                     log_path = Path("logs/service")
@@ -240,9 +240,9 @@ class TestServiceEdgeCases:
         """Test that signal handlers are properly registered."""
         import signal
         
-        with patch('arbihedron_service.AlertManager'):
-            with patch('arbihedron_service.HealthMonitor'):
-                with patch('arbihedron_service.ArbihedronBot'):
+        with patch('arbihedron.service.AlertManager'):
+            with patch('arbihedron.service.HealthMonitor'):
+                with patch('arbihedron.service.ArbihedronBot'):
                     with patch('signal.signal') as mock_signal:
                         service = ArbihedronService()
                         
@@ -255,28 +255,28 @@ class TestServiceEdgeCases:
     @pytest.mark.asyncio
     async def test_bot_cleanup_on_error(self):
         """Test that resources are cleaned up on error."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = True
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = True
                 mock_health_config.port = 8080
                 
-                with patch('arbihedron_service.AlertManager') as mock_alert_class:
+                with patch('arbihedron.service.AlertManager') as mock_alert_class:
                     mock_alert = MagicMock()
                     mock_alert.initialize = AsyncMock()
                     mock_alert.cleanup = AsyncMock()
                     mock_alert.alert_startup = AsyncMock()
                     mock_alert_class.return_value = mock_alert
                     
-                    with patch('arbihedron_service.HealthMonitor') as mock_health_class:
+                    with patch('arbihedron.service.HealthMonitor') as mock_health_class:
                         mock_health = MagicMock()
                         mock_health.initialize = AsyncMock()
                         mock_health.cleanup = AsyncMock()
                         mock_health_class.return_value = mock_health
                         
-                        with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                        with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                             mock_bot = MagicMock()
                             mock_bot.initialize = AsyncMock()
                             mock_bot.run = AsyncMock(side_effect=Exception("Bot error"))
@@ -294,14 +294,14 @@ class TestServiceIntegration:
     @pytest.mark.asyncio
     async def test_full_service_lifecycle(self):
         """Test complete service start-run-stop lifecycle."""
-        with patch('arbihedron_service.ALERT_CONFIG') as mock_alert_config:
+        with patch('arbihedron.service.ALERT_CONFIG') as mock_alert_config:
             mock_alert_config.email_enabled = False
             mock_alert_config.slack_enabled = False
             
-            with patch('arbihedron_service.HEALTH_CONFIG') as mock_health_config:
+            with patch('arbihedron.service.HEALTH_CONFIG') as mock_health_config:
                 mock_health_config.enabled = False
                 
-                with patch('arbihedron_service.ArbihedronBot') as mock_bot_class:
+                with patch('arbihedron.service.ArbihedronBot') as mock_bot_class:
                     mock_bot = MagicMock()
                     mock_bot.initialize = AsyncMock()
                     

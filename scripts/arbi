@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SERVICE_NAME="com.arbihedron.bot"
 PLIST_FILE="$HOME/Library/LaunchAgents/$SERVICE_NAME.plist"
-PYTHON_SCRIPT="$PROJECT_DIR/arbihedron_service.py"
+PYTHON_SCRIPT="$PROJECT_DIR/src/arbihedron/service.py"
 LOG_FILE="$PROJECT_DIR/logs/service/current.log"
 PID_FILE="$PROJECT_DIR/arbihedron.pid"
 
