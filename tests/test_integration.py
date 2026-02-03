@@ -29,7 +29,7 @@ class TestArbitrageEngineIntegration:
         """Test complete opportunity finding workflow."""
         from arbihedron.core.arbitrage_engine import ArbitrageEngine
         from arbihedron.core.exchange_client import ExchangeClient
-        from arbihedron.config import arbihedron.config as config
+        from arbihedron import config
         
         # Mock exchange client
         mock_exchange = Mock(spec=ExchangeClient)
@@ -55,7 +55,7 @@ class TestArbitrageEngineIntegration:
     def test_calculate_profit(self):
         """Test profit calculation logic."""
         from arbihedron.core.arbitrage_engine import ArbitrageEngine
-        from arbihedron.config import arbihedron.config as config
+        from arbihedron import config
         
         mock_exchange = Mock()
         engine = ArbitrageEngine(mock_exchange, config.trading)
@@ -286,7 +286,7 @@ class TestConfigurationIntegration:
     
     def test_config_loading(self):
         """Test configuration loads correctly."""
-        from arbihedron.config import arbihedron.config as config
+        from arbihedron import config
         
         assert config.exchange is not None
         assert config.trading is not None

@@ -13,7 +13,7 @@ console = Console()
 @pytest_asyncio.fixture
 async def engine():
     """Fixture to create GNN engine for tests."""
-    from arbihedron.config import arbihedron.config as config
+    from arbihedron import config
     from arbihedron.core.exchange_client import ExchangeClient
     from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
     
@@ -71,7 +71,7 @@ async def test_gnn_initialization():
     console.print(Panel.fit(" Testing GNN Initialization", style="bold cyan"))
     
     try:
-        from arbihedron.config import arbihedron.config as config
+        from arbihedron import config
         from arbihedron.core.exchange_client import ExchangeClient
         from arbihedron.core.gnn_arbitrage_engine import GNNArbitrageEngine, GNNConfig
         

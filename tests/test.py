@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import asyncio
 from datetime import datetime
 from arbihedron.models import TradingPair, TriangularPath, ArbitrageOpportunity, TradeDirection
-from arbihedron.config import arbihedron.config as config
+from arbihedron import config
 
 def test_models():
     """Test data models."""

@@ -68,6 +68,7 @@ USER arbihedron
 
 # Copy application code
 COPY --chown=arbihedron:arbihedron *.py ./
+COPY --chown=arbihedron:arbihedron src/ ./src/
 COPY --chown=arbihedron:arbihedron docs/ ./docs/
 COPY --chown=arbihedron:arbihedron models/ ./models/
 
@@ -76,7 +77,7 @@ RUN mkdir -p data logs exports
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+    CMD python -c "import http.client; conn = http.client.HTTPConnection('localhost:8000'); conn.request('GET', '/health'); conn.getresponse()" || exit 1
 
 EXPOSE 8000
 
